@@ -11,4 +11,12 @@ output:
 
 ## Project thoughts
 
-I am interested in exploring data related to Environmental history, hopefully related to China or Japan.
+I am going to use the dataset from this study:
+#Nicholas D. Anderson, “Introducing the Warring States Japan Battle Data,” International Interactions, Latest articles (2022) https://doi.org/10.1080/03050629.2023.2149514
+
+In my study, I aim to explore the correlation between the intensity of whaling activities and the frequency and nature of conflicts during Japan's Warring States era. 
+Whaling, deeply rooted in Japanese culture and economy, might have played a pivotal role in influencing conflicts, particularly in significant whaling ports like Taiji, Owase, Ayukawa, and Wadaura. Drawing from battle datasets of the era, I intend to classify regions based on whaling activity intensity (high, medium, low) and analyze the ensuing conflict patterns. Specifically, my outcome variables will be the count of conflicts and their nature (siege vs. non-siege). 
+Leveraging R's ggplot package, I'll visualize the relationship between whaling intensity and conflict frequency, as well as the conflict type. 
+Through regression analyses, I'll determine if there's a significant causal link, with a positive coefficient suggesting regions with pronounced whaling activities witnessed more conflicts and vice versa. The nature of these conflicts, whether sieges or otherwise, might further provide insights into the strategic significance of these whaling hubs. 
+A consistent pattern in these findings will either support or refute my hypothesis regarding the role of whaling in shaping regional conflicts during the period.
+
