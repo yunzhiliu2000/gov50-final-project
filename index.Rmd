@@ -7,8 +7,6 @@ output:
     self_contained: false
 ---
 
-
-
 ## Project thoughts
 
 I am going to use the dataset from this study:
