@@ -23,6 +23,9 @@ A consistent pattern in these findings will either support or refute my hypothes
 ```{r}
 library(tidyverse)
 library(broom)
+library(readr)
+WarringStatesJapan_battledataV1 <- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_battledataV1.csv")
+View(WarringStatesJapan_battledataV1)
 ```
 
 
