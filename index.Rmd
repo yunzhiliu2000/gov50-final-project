@@ -61,36 +61,41 @@ warringstate <- warringstate |>
     naval_or_land = if_else(naval == 1, "Naval Battle", "Land Battle"))
 
 #number of battles taken place in each year
-warringstate |>
+plot_totalbattlebyyear <- warringstate |>
 ggplot(mapping = aes(x = year)) + 
   geom_histogram()
+plot_totalbattlebyyear
 
 #number of battles taken place in each region
-warringstate |>
+plot_totalbattlebyregion <- warringstate |>
 ggplot(mapping = aes(x = region)) + 
   geom_bar()
+plot_totalbattlebyregion
 
 #number of battles taken place in each province (red = inland province, blue = near shore province)
-warringstate |>
+plot_totalbattlebyprovince <- warringstate |>
 ggplot(mapping = aes(x = province)) + 
   geom_bar(mapping = aes(fill = shore_or_inland))
+plot_totalbattlebyprovince
 
 #number of battles taken place in whaling provinces
-warringstate |>
+plot_whalingbyprovince <- warringstate |>
   filter(province == whaling_provinces) |>
   ggplot(mapping = aes(x = province)) + 
   geom_bar()
+
+plot_whalingbyprovince
 ```
 
 
 ```{r}
 #battles taken place in whaling provinces by province and year
-plot_whalingbyprovince <- warringstate |>
+plot_whalingbyprovinceandyear <- warringstate |>
   filter(province == whaling_provinces) |>
 ggplot(mapping = aes(x = year, y = province)) +
   geom_point()
 
-plot_whalingbyprovince
+plot_whalingbyprovinceandyear
 
 #battles taken place in all whaling provinces by year, and the proportion of naval battles
 plot_whalingbyyear <- warringstate |>
