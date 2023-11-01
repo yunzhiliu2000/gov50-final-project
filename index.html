@@ -115,7 +115,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["API_EN.ATM.METH.AG.KT.CE_DS2_en_csv_v2_5873414.zip","API_ER.FSH.CAPT.MT_DS2_en_csv_v2_5873457.zip","API_ER.FSH.PROD.MT_DS2_en_csv_v2_5873451.zip","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/header-attrs-2.17/header-attrs.js","index_files/header-attrs-2.24/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["API_EN.ATM.METH.AG.KT.CE_DS2_en_csv_v2_5873414.zip","API_ER.FSH.CAPT.MT_DS2_en_csv_v2_5873457.zip","API_ER.FSH.PROD.MT_DS2_en_csv_v2_5873451.zip","F00013136-WVS_Wave_7_Japan_Csv_v5.0.csv","F00013136-WVS_Wave_7_Japan_Csv_v5.0.zip","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/figure-html5/unnamed-chunk-3-1.png","index_files/figure-html5/unnamed-chunk-3-2.png","index_files/figure-html5/unnamed-chunk-3-3.png","index_files/figure-html5/unnamed-chunk-3-4.png","index_files/figure-html5/unnamed-chunk-4-1.png","index_files/figure-html5/unnamed-chunk-4-2.png","index_files/figure-html5/unnamed-chunk-6-1.png","index_files/figure-html5/unnamed-chunk-7-1.png","index_files/figure-html5/unnamed-chunk-8-1.png","index_files/figure-html5/unnamed-chunk-9-1.png","index_files/header-attrs-2.17/header-attrs.js","index_files/header-attrs-2.24/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1551,7 +1551,262 @@ Whaling, deeply rooted in Japanese culture and economy, might have played a pivo
 Leveraging R’s ggplot package, I’ll visualize the relationship between whaling intensity and conflict frequency, as well as the conflict type.
 Through regression analyses, I’ll determine if there’s a significant causal link, with a positive coefficient suggesting regions with pronounced whaling activities witnessed more conflicts and vice versa. The nature of these conflicts, whether sieges or otherwise, might further provide insights into the strategic significance of these whaling hubs.
 A consistent pattern in these findings will either support or refute my hypothesis regarding the role of whaling in shaping regional conflicts during the period.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://broom.tidymodels.org/'>broom</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://readr.tidyverse.org'>readr</a></span><span class='op'>)</span></span>
+<span><span class='va'>WarringStatesJapan_battledataV1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://readr.tidyverse.org/reference/read_delim.html'>read_csv</a></span><span class='op'>(</span><span class='st'>"~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_battledataV1.csv"</span><span class='op'>)</span></span>
+<span><span class='co'># View(WarringStatesJapan_battledataV1)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>warringstate</span> <span class='op'>&lt;-</span> <span class='va'>WarringStatesJapan_battledataV1</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>province</span><span class='op'>)</span>, <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>region</span><span class='op'>)</span>, <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>naval</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>warringstate</span><span class='op'>$</span><span class='va'>naval</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span><span class='op'>(</span><span class='va'>warringstate</span><span class='op'>$</span><span class='va'>naval</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>near_shore_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"yamashiro"</span>, <span class='st'>"ise"</span>, <span class='st'>"harima"</span>, <span class='st'>"hizen"</span>, <span class='st'>"kii"</span>, <span class='st'>"settsu"</span>, </span>
+<span>                          <span class='st'>"bizen"</span>, <span class='st'>"aki"</span>, <span class='st'>"chikuzen"</span>, <span class='st'>"bingo"</span>, <span class='st'>"buzen"</span>, <span class='st'>"nagato"</span>, </span>
+<span>                          <span class='st'>"suo"</span>, <span class='st'>"awa1"</span>, <span class='st'>"izu"</span>, <span class='st'>"tsushima"</span>, <span class='st'>"izumo"</span>, </span>
+<span>                          <span class='st'>"iki"</span>, <span class='st'>"musashi"</span>, <span class='st'>"toutoumi"</span>, <span class='st'>"osumi"</span>, <span class='st'>"satsuma"</span>, <span class='st'>"sagami"</span>, </span>
+<span>                          <span class='st'>"tosa"</span>, <span class='st'>"houki"</span>, <span class='st'>"ecchu"</span>, <span class='st'>"higo"</span>, <span class='st'>"hyuuga"</span>, <span class='st'>"sanuki"</span>, </span>
+<span>                          <span class='st'>"bungo"</span>, <span class='st'>"iyo"</span>, <span class='st'>"oki"</span>, <span class='st'>"noto"</span>, <span class='st'>"awa2"</span>, <span class='st'>"awaji"</span>, <span class='st'>"sado"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>inland_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"yamato"</span>, <span class='st'>"tanba"</span>, <span class='st'>"shinano"</span>, <span class='st'>"mimasaka"</span>, <span class='st'>"oumi"</span>, <span class='st'>"tajima"</span>, </span>
+<span>                      <span class='st'>"kaga"</span>, <span class='st'>"kawachi"</span>, <span class='st'>"mino"</span>, <span class='st'>"owari"</span>, <span class='st'>"echizen"</span>, <span class='st'>"kai"</span>, <span class='st'>"tango"</span>, </span>
+<span>                      <span class='st'>"bicchu"</span>, <span class='st'>"mutsu"</span>, <span class='st'>"shimotsuke"</span>, <span class='st'>"izumi"</span>, <span class='st'>"shimousa"</span>, <span class='st'>"kazusa"</span>, </span>
+<span>                      <span class='st'>"kouzuke"</span>, <span class='st'>"chikugo"</span>, <span class='st'>"inaba"</span>, <span class='st'>"hitachi"</span>, <span class='st'>"echigo"</span>, <span class='st'>"mikawa"</span>, </span>
+<span>                      <span class='st'>"iga"</span>, <span class='st'>"wakasa"</span>, <span class='st'>"dewa"</span>, <span class='st'>"iwami"</span>, <span class='st'>"hida"</span>, <span class='st'>"suruga"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>whaling_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"hizen"</span>, <span class='st'>"satsuma"</span>, <span class='st'>"osumi"</span>, <span class='st'>"higo"</span>, <span class='st'>"hyuuga"</span>, <span class='st'>"bungo"</span>, </span>
+<span>                       <span class='st'>"kii"</span>, <span class='st'>"ise"</span>, <span class='st'>"izumo"</span>, <span class='st'>"houki"</span>, <span class='st'>"tosa"</span>, <span class='st'>"iyo"</span>, <span class='st'>"bizen"</span>, </span>
+<span>                       <span class='st'>"bingo"</span>, <span class='st'>"aki"</span>, <span class='st'>"harima"</span>, <span class='st'>"iki"</span>, <span class='st'>"tsushima"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+##$ Descriptive Visualizations
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>warringstate</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    shore_or_inland <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>    <span class='va'>province</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='va'>inland_provinces</span> <span class='op'>~</span> <span class='st'>"inland"</span>,</span>
+<span>    <span class='va'>province</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='va'>near_shore_provinces</span> <span class='op'>~</span> <span class='st'>"near shore"</span><span class='op'>)</span>,</span>
+<span>    naval_or_land <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>naval</span> <span class='op'>==</span> <span class='fl'>1</span>, <span class='st'>"Naval Battle"</span>, <span class='st'>"Land Battle"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'>#number of battles taken place in each year</span></span>
+<span><span class='va'>plot_totalbattlebyyear</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>year</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_histogram.html'>geom_histogram</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>plot_totalbattlebyyear</span></span></code></pre>
+</div>
+<img src="index_files/figure-html5/unnamed-chunk-3-1.png" width="624" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#number of battles taken place in each region</span></span>
+<span><span class='va'>plot_totalbattlebyregion</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>region</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='va'>plot_totalbattlebyregion</span></span></code></pre>
+</div>
+<img src="index_files/figure-html5/unnamed-chunk-3-2.png" width="624" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#number of battles taken place in each province (red = inland province, blue = near shore province)</span></span>
+<span><span class='va'>plot_totalbattlebyprovince</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>province</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>fill <span class='op'>=</span> <span class='va'>shore_or_inland</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>plot_totalbattlebyprovince</span></span></code></pre>
+</div>
+<img src="index_files/figure-html5/unnamed-chunk-3-3.png" width="624" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#number of battles taken place in whaling provinces</span></span>
+<span><span class='va'>plot_whalingbyprovince</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>province</span> <span class='op'>==</span> <span class='va'>whaling_provinces</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>province</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>plot_whalingbyprovince</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-3-4.png" width="624" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#battles taken place in whaling provinces by province and year</span></span>
+<span><span class='va'>plot_whalingbyprovinceandyear</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>province</span> <span class='op'>==</span> <span class='va'>whaling_provinces</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>year</span>, y <span class='op'>=</span> <span class='va'>province</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>plot_whalingbyprovinceandyear</span></span></code></pre>
+</div>
+<img src="index_files/figure-html5/unnamed-chunk-4-1.png" width="624" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#battles taken place in all whaling provinces by year, and the proportion of naval battles</span></span>
+<span><span class='va'>plot_whalingbyyear</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>province</span> <span class='op'>==</span> <span class='va'>whaling_provinces</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>naval_or_land</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>year</span>, fill <span class='op'>=</span> <span class='va'>naval_or_land</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>plot_whalingbyyear</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-4-2.png" width="624" /></p>
+</div>
+<p>##$ Please ONLY CHECK UNTIL ABOVE! THAT is my FIRST VISUALIZATION! ^^^
+EVERYTHING beyong this point is STILL EXPERIMENT!</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#plot showing provinces where naval wars took place, and the proportion of naval wars among all battles in these places</span></span>
+<span><span class='va'>naval_by_province</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>province</span>, <span class='va'>naval</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>war_no <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>naval_by_province</span></span></code></pre>
+</div>
+<pre><code># A tibble: 84 × 3
+# Groups:   province [67]
+   province naval war_no
+   &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;
+ 1 aki          0    111
+ 2 aki          1      5
+ 3 awa1         0     11
+ 4 awa2         0     20
+ 5 awaji        0      6
+ 6 bicchu       0     45
+ 7 bingo        0     45
+ 8 bizen        0     31
+ 9 bungo        0     77
+10 buzen        0     83
+# ℹ 74 more rows</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># plot showing regions where naval wars took place, and the proportion of naval wars among all battles in these places</span></span>
+<span><span class='va'>naval_by_region</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>region</span>, <span class='va'>naval_or_land</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>war_no2 <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>naval_by_region</span></span></code></pre>
+</div>
+<pre><code># A tibble: 15 × 3
+# Groups:   region [8]
+   region      naval_or_land war_no2
+   &lt;chr&gt;       &lt;chr&gt;           &lt;int&gt;
+ 1 hokurikudou Land Battle       476
+ 2 hokurikudou Naval Battle        1
+ 3 kinai       Land Battle      1187
+ 4 kinai       Naval Battle       12
+ 5 nankaidou   Land Battle       270
+ 6 nankaidou   Naval Battle       15
+ 7 saikaidou   Land Battle       880
+ 8 saikaidou   Naval Battle       28
+ 9 sanindou    Land Battle       284
+10 sanindou    Naval Battle        4
+11 sanyoudou   Land Battle       379
+12 sanyoudou   Naval Battle        5
+13 toukaidou   Land Battle      1260
+14 toukaidou   Naval Battle       13
+15 tousandou   Land Battle      1831</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>naval_prop_region</span> <span class='op'>&lt;-</span> <span class='va'>naval_by_region</span><span class='op'>|&gt;</span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>region</span>, y <span class='op'>=</span> <span class='va'>war_no2</span>, fill <span class='op'>=</span> <span class='va'>naval_or_land</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_col</a></span><span class='op'>(</span>position <span class='op'>=</span> <span class='st'>"dodge"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>naval_prop_region</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-6-1.png" width="624" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#scatterplot across time and space</span></span>
+<span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>data <span class='op'>=</span> <span class='va'>warringstate</span>, mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>year</span>, y <span class='op'>=</span> <span class='va'>province</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-7-1.png" width="624" /></p>
+</div>
+<!-- warringstate |> -->
+<!--   filter(province == naval_battle_provinces) |> -->
+<!-- ggplot(mapping = aes(x = year, y = province)) + -->
+<!--   geom_point() -->
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>naval_battle</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>naval</span> <span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span><span class='va'>naval_battle</span></span></code></pre>
+</div>
+<pre><code># A tibble: 78 × 31
+   battle_id  year month  day   sideA          sideB location province
+       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;          &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;   
+ 1       133  1471 spring &lt;NA&gt;  pirates (倭寇) sou … &lt;NA&gt;     tsushima
+ 2       818  1521 4      25    bicchu provin… &lt;NA&gt;  bouno-t… satsuma 
+ 3       893  1526 &lt;NA&gt;   &lt;NA&gt;  pirates of ta… &lt;NA&gt;  &lt;NA&gt;     wakasa  
+ 4      1193  1541 1      15    ouchi (大内)   tomo… itsuku-… aki     
+ 5      1193  1541 1      15    ouchi (大内)   pira… itsuku-… aki     
+ 6      1471  1554 5      &lt;NA&gt;  yamagata nari… sue … &lt;NA&gt;     aki     
+ 7      1492  1555 spring &lt;NA&gt;  era fusahide … &lt;NA&gt;  itsuku-… aki     
+ 8      1493  1555 4      8     aki province … &lt;NA&gt;  itsuku-… aki     
+ 9      1501  1555 7      26    sou morinaga … pira… &lt;NA&gt;     tsushima
+10      1600  1559 &lt;NA&gt;   &lt;NA&gt;  tsuna shigech… &lt;NA&gt;  funagoe  tsushima
+# ℹ 68 more rows
+# ℹ 23 more variables: province_id &lt;dbl&gt;, region &lt;chr&gt;,
+#   region_id &lt;dbl&gt;, initiatorA &lt;dbl&gt;, victoryA &lt;dbl&gt;,
+#   victoryB &lt;dbl&gt;, draw &lt;dbl&gt;, coalitionA &lt;dbl&gt;, coalitionB &lt;dbl&gt;,
+#   joinerA &lt;dbl&gt;, joinerB &lt;dbl&gt;, naval &lt;int&gt;, siege &lt;dbl&gt;,
+#   forcesA &lt;chr&gt;, forcesB &lt;chr&gt;, casualtiesA &lt;chr&gt;,
+#   casualtiesB &lt;chr&gt;, year2 &lt;dbl&gt;, month2 &lt;chr&gt;, day2 &lt;chr&gt;, …</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>naval_battle</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>year</span><span class='op'>)</span><span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>year</span>, y <span class='op'>=</span> <span class='va'>n</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_col</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-8-1.png" width="624" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>naval_battle_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='va'>naval_battle</span><span class='op'>$</span><span class='va'>province</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>naval_battle_provinces</span></span></code></pre>
+</div>
+<pre><code> [1] &quot;tsushima&quot; &quot;satsuma&quot;  &quot;wakasa&quot;   &quot;aki&quot;      &quot;buzen&quot;    &quot;hizen&quot;   
+ [7] &quot;osumi&quot;    &quot;izumo&quot;    &quot;settsu&quot;   &quot;toutoumi&quot; &quot;sanuki&quot;   &quot;kii&quot;     
+[13] &quot;izu&quot;      &quot;inaba&quot;    &quot;izumi&quot;    &quot;owari&quot;    &quot;iyo&quot;     </code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>naval_province_battle_tibble</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>province</span> <span class='op'>==</span> <span class='va'>naval_battle_provinces</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>province</span>, <span class='va'>naval_or_land</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>war_count <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>naval_province_battle_tibble</span></span></code></pre>
+</div>
+<pre><code># A tibble: 17 × 3
+# Groups:   province [15]
+   province naval_or_land war_count
+   &lt;chr&gt;    &lt;chr&gt;             &lt;int&gt;
+ 1 aki      Land Battle           3
+ 2 buzen    Land Battle           7
+ 3 hizen    Land Battle           7
+ 4 inaba    Land Battle           1
+ 5 iyo      Land Battle           2
+ 6 izu      Land Battle           4
+ 7 izu      Naval Battle          1
+ 8 izumi    Land Battle           6
+ 9 izumo    Land Battle           5
+10 kii      Land Battle           8
+11 osumi    Land Battle           3
+12 owari    Land Battle           6
+13 sanuki   Land Battle           3
+14 sanuki   Naval Battle          1
+15 satsuma  Land Battle           1
+16 settsu   Land Battle          14
+17 toutoumi Land Battle           3</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>naval_province_battle_tibble</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>province</span>, y <span class='op'>=</span> <span class='va'>war_count</span>, fill <span class='op'>=</span> <span class='va'>naval_or_land</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_col</a></span><span class='op'>(</span>position <span class='op'>=</span> <span class='st'>"dodge"</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-9-1.png" width="624" /></p>
+</div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

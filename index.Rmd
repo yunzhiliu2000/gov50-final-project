@@ -23,7 +23,7 @@ library(tidyverse)
 library(broom)
 library(readr)
 WarringStatesJapan_battledataV1 <- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_battledataV1.csv")
-View(WarringStatesJapan_battledataV1)
+# View(WarringStatesJapan_battledataV1)
 ```
 
 
@@ -141,12 +141,11 @@ naval_prop_region
 
 ggplot(data = warringstate, mapping = aes(x = year, y = province)) +
   geom_point()
-
-warringstate |>
-  filter(province == naval_battle_provinces) |>
-ggplot(mapping = aes(x = year, y = province)) +
-  geom_point()
 ```
+<!-- warringstate |> -->
+<!--   filter(province == naval_battle_provinces) |> -->
+<!-- ggplot(mapping = aes(x = year, y = province)) + -->
+<!--   geom_point() -->
 
 ```{r}
 naval_battle <- warringstate |>
