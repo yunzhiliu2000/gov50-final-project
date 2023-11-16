@@ -5,90 +5,112 @@ description: "My final project - editted Oct13"
 output:
   distill::distill_article:
     self_contained: false
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ## Project thoughts
 
-I am going to use the dataset from this study:
-#Nicholas D. Anderson, “Introducing the Warring States Japan Battle Data,” International Interactions, Latest articles (2022) https://doi.org/10.1080/03050629.2023.2149514
+I use the data from this study: #Nicholas D.
+Anderson, "Introducing the Warring States Japan Battle Data," International Interactions, Latest articles (2022) <https://doi.org/10.1080/03050629.2023.2149514>
 
-In my study, I aim to explore the correlation between the intensity of whaling activities and the frequency and nature of conflicts during Japan's Warring States era. 
-Whaling, deeply rooted in Japanese culture and economy, might have played a pivotal role in influencing conflicts, particularly in significant whaling ports like Taiji, Owase, Ayukawa, and Wadaura. Drawing from battle datasets of the era, I intend to classify regions based on whaling activity intensity (high, medium, low) and analyze the ensuing conflict patterns. Specifically, my outcome variables will be the count of conflicts and their nature (siege vs. non-siege). 
-Leveraging R's ggplot package, I'll visualize the relationship between whaling intensity and conflict frequency, as well as the conflict type. 
-Through regression analyses, I'll determine if there's a significant causal link, with a positive coefficient suggesting regions with pronounced whaling activities witnessed more conflicts and vice versa. The nature of these conflicts, whether sieges or otherwise, might further provide insights into the strategic significance of these whaling hubs. 
+I aim to explore the correlation between the intensity of whaling activities and the frequency and nature of conflicts during Japan's Warring States era.
+Whaling, deeply rooted in Japanese culture and economy, might have played a pivotal role in influencing conflicts, particularly in significant whaling ports like Taiji, Owase, Ayukawa, and Wadaura.
+Drawing from battle datasets of the era, I intend to classify regions based on whaling activity intensity (high, medium, low) and analyze the ensuing conflict patterns.
+Specifically, my outcome variables will be the count of conflicts and their nature (siege vs. non-siege).
+\
+I'll visualize the relationship between whaling intensity and conflict frequency, as well as the conflict type.
+Through regression analyses, I'll determine if there's a significant causal link, with a positive coefficient suggesting regions with pronounced whaling activities witnessed more conflicts and vice versa.
+The nature of these conflicts, whether sieges or otherwise, might further provide insights into the strategic significance of these whaling hubs.
 A consistent pattern in these findings will either support or refute my hypothesis regarding the role of whaling in shaping regional conflicts during the period.
 
 ```{r}
+install.packages("gridExtra")
+library(gridExtra)
+
 library(tidyverse)
 library(broom)
+library(infer)
 library(readr)
+
+rm(warstate)
+
 WarringStatesJapan_battledataV1 <- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_battledataV1.csv")
 # View(WarringStatesJapan_battledataV1)
-```
 
+```
 
 ```{r}
 warringstate <- WarringStatesJapan_battledataV1 |>
   filter(!is.na(province), !is.na(region), !is.na(naval))
 
+rm(df)
+
 warringstate$naval <- as.integer(warringstate$naval)
-
-near_shore_provinces <- c("yamashiro", "ise", "harima", "hizen", "kii", "settsu", 
-                          "bizen", "aki", "chikuzen", "bingo", "buzen", "nagato", 
-                          "suo", "awa1", "izu", "tsushima", "izumo", 
-                          "iki", "musashi", "toutoumi", "osumi", "satsuma", "sagami", 
-                          "tosa", "houki", "ecchu", "higo", "hyuuga", "sanuki", 
-                          "bungo", "iyo", "oki", "noto", "awa2", "awaji", "sado")
-
-inland_provinces <- c("yamato", "tanba", "shinano", "mimasaka", "oumi", "tajima", 
-                      "kaga", "kawachi", "mino", "owari", "echizen", "kai", "tango", 
-                      "bicchu", "mutsu", "shimotsuke", "izumi", "shimousa", "kazusa", 
-                      "kouzuke", "chikugo", "inaba", "hitachi", "echigo", "mikawa", 
-                      "iga", "wakasa", "dewa", "iwami", "hida", "suruga")
-
-whaling_provinces <- c("hizen", "satsuma", "osumi", "higo", "hyuuga", "bungo", 
-                       "kii", "ise", "izumo", "houki", "tosa", "iyo", "bizen", 
-                       "bingo", "aki", "harima", "iki", "tsushima")
+#Here I am changing the variable into an integer
 
 ```
 
-##$ Descriptive Visualizations
+#1. List out Whaling Provinces & Near-Shore Provinces
 ```{r}
+near_shore_provinces <- c("yamashiro", "ise", "harima", "hizen", "kii", "settsu", "bizen", "aki", "chikuzen", "bingo", "buzen", "nagato", "suo", "awa1", "izu", "tsushima", "izumo", "iki", "musashi", "toutoumi", "osumi", "satsuma", "sagami","tosa", "houki", "ecchu", "higo", "hyuuga", "sanuki", "bungo", "iyo", "oki", "noto", "awa2", "awaji", "sado")
+
+inland_provinces <- c("yamato", "tanba", "shinano", "mimasaka", "oumi", "tajima", "kaga", "kawachi", "mino", "owari", "echizen", "kai", "tango", "bicchu", "mutsu", "shimotsuke", "izumi", "shimousa", "kazusa", "kouzuke", "chikugo", "inaba", "hitachi", "echigo", "mikawa", "iga", "wakasa", "dewa", "iwami", "hida", "suruga")
+
+whaling_provinces <- c("hizen", "satsuma", "osumi", "higo", "hyuuga", "bungo",  "kii", "ise", "izumo", "houki", "tosa", "iyo", "bizen", "bingo", "aki", "harima", "iki", "tsushima")
+
 warringstate <- warringstate |>
   mutate(
-    shore_or_inland = case_when(
+    geography = case_when(
     province %in% inland_provinces ~ "inland",
-    province %in% near_shore_provinces ~ "near shore"),
-    naval_or_land = if_else(naval == 1, "Naval Battle", "Land Battle"))
+    province %in% near_shore_provinces ~ "shore"),
+    battle_geography = if_else(naval == 1, "Naval Battle", "Land Battle"),
+    whaling = if_else(province == whaling_provinces, 1, 0),
+    naval = as.factor(naval))
 
-#number of battles taken place in each year
-plot_totalbattlebyyear <- warringstate |>
-ggplot(mapping = aes(x = year)) + 
-  geom_histogram()
-plot_totalbattlebyyear
+```
 
-#number of battles taken place in each region
-plot_totalbattlebyregion <- warringstate |>
-ggplot(mapping = aes(x = region)) + 
-  geom_bar()
-plot_totalbattlebyregion
 
+
+#2. Descriptive Visualizations
+
+2.1 
+
+```{r}
 #number of battles taken place in each province (red = inland province, blue = near shore province)
+totalbattlebyprovince <- warringstate |>
+  group_by(geography, province) |>
+  summarize(count = n())
+knitr::kable(totalbattlebyprovince)
+
 plot_totalbattlebyprovince <- warringstate |>
 ggplot(mapping = aes(x = province)) + 
-  geom_bar(mapping = aes(fill = shore_or_inland))
+  geom_bar(mapping = aes(fill = geography)) +
+  labs(title = "battles in each province by geographical features")
 plot_totalbattlebyprovince
+```
 
+2.2 
+
+```{r}
 #number of battles taken place in whaling provinces
+
+battleinwhalingprovinces <- warringstate |>
+  filter(whaling == 1) |>
+  group_by(province)|>
+  summarize(count = n())
+battleinwhalingprovinces
+
 plot_whalingbyprovince <- warringstate |>
   filter(province == whaling_provinces) |>
   ggplot(mapping = aes(x = province)) + 
-  geom_bar()
+  geom_bar(aes(width = 1)) + labs(title = "battles in whaling provinces")
 
 plot_whalingbyprovince
 ```
 
-
+2.2 
 ```{r}
 #battles taken place in whaling provinces by province and year
 plot_whalingbyprovinceandyear <- warringstate |>
@@ -100,83 +122,106 @@ plot_whalingbyprovinceandyear
 
 #battles taken place in all whaling provinces by year, and the proportion of naval battles
 plot_whalingbyyear <- warringstate |>
-  filter(province == whaling_provinces) |>
-  group_by(naval_or_land) |>
-ggplot(mapping = aes(x = year, fill = naval_or_land)) +
-  geom_bar()
+  filter(whaling == 1) |>
+  group_by(year, naval) |>
+  summarize(count = n(), .groups = 'drop') |>
+  ggplot(mapping = aes(x = year, y = count, fill = naval)) +
+  geom_bar(stat = "identity")
+
 
 plot_whalingbyyear
 ```
 
-##$ Please ONLY CHECK UNTIL ABOVE! THAT is my FIRST VISUALIZATION! ^^^
-EVERYTHING beyong this point is STILL EXPERIMENT!
-
-
-
-
+2.3 Time & Location
 ```{r}
-#plot showing provinces where naval wars took place, and the proportion of naval wars among all battles in these places
-naval_by_province <- warringstate |>
-  group_by(province, naval) |>
-  summarize(war_no = n())
-naval_by_province
+warringstate |>
+  mutate(shore = if_else(geography == "shore", 1, 0)) |>
+  group_by(year, shore) |>
+  summarize(count = n(), .groups = 'drop') |>
+  ggplot(aes(x = year, y = count)) +
+  geom_point() +
+  geom_smooth(na.rm = FALSE) +
+  facet_wrap(~ shore, labeller = as_labeller(c('0' = 'no. of battles in inland provinces', '1' = 'no. of battles in shore provinces')))
+```
+Analysis 1: We see a significant rise in numbers of battles, both in inland provinces and shore provinces, after the 1550s. The rise is proportionally faster/more significant in inland provinces as compared to shore provinces. 
+
+This lead to my question: is the more significant increase in number in inland provinces due to the rise of cavalry? 
+
+2.4 Calvary & Time & Location
+```{r}
+warringstate <- warringstate |>
+  mutate(cavalryA = if_else(str_detect(forcesA, "cavalry"), 1, 0),
+         cavalryB = if_else(str_detect(forcesB, "cavalry"), 1, 0),
+         cavalry = if_else(cavalryA == 1|cavalryB == 1, 1, 0))
+
+warringstate$cavalry <- ifelse(is.na(warringstate$cavalry), 0, warringstate$cavalry)
 ```
 
-
 ```{r}
-# plot showing regions where naval wars took place, and the proportion of naval wars among all battles in these places
-naval_by_region <- warringstate |>
-  group_by(region, naval_or_land) |>
-  summarize(war_no2 = n())
-naval_by_region
-
-naval_prop_region <- naval_by_region|>
-ggplot(mapping = aes(x = region, y = war_no2, fill = naval_or_land)) +
-  geom_col(position = "dodge")
-
-naval_prop_region
-```
-```{r}
-#scatterplot across time and space
-
-ggplot(data = warringstate, mapping = aes(x = year, y = province)) +
-  geom_point()
-```
-<!-- warringstate |> -->
-<!--   filter(province == naval_battle_provinces) |> -->
-<!-- ggplot(mapping = aes(x = year, y = province)) + -->
-<!--   geom_point() -->
-
-```{r}
-naval_battle <- warringstate |>
-  filter(naval == 1)
-naval_battle
-
-naval_battle |>
+warringstate |>
+  filter(cavalry == 1) |>
   group_by(year)|>
-  summarize(n = n())|>
-  ggplot(aes(x = year, y = n)) +
-  geom_col()
+  summarize(count = n()) |>
+  ggplot(aes(x = year, y = count))+
+  geom_point() +
+  geom_smooth(na.rm = FALSE)
+
+#proportion of cavalry-involved battle each year
+total_prop_cavalry <- warringstate |>
+  group_by(year) |>
+  summarize(
+    total_battles = n(), 
+    cavalry_battles = sum(cavalry, na.rm = TRUE), 
+    proportion_cavalry = cavalry_battles / total_battles
+  ) |>
+  filter(proportion_cavalry > 0)
+total_prop_cavalry
+
+total_prop_cavalry_plot <-
+  ggplot(total_prop_cavalry, aes(x = year, y = proportion_cavalry)) +
+  geom_point() + geom_smooth() +
+   scale_y_log10() +
+  labs(
+    title = "Proportion of Battles Involving Cavalry Over Years",
+    x = "Year",
+    y = "Proportion of Cavalry Battles"
+  )
+total_prop_cavalry_plot
 ```
 
 
 ```{r}
-naval_battle_provinces <- unique(naval_battle$province)
+#proportion of cavalry-involved LAND battle each year
+land_prop_cavalry <- warringstate |>
+  filter(naval == 0) |>
+  group_by(year) |>
+  summarize(
+    total_battles = n(), 
+    cavalry_battles = sum(cavalry, na.rm = TRUE), 
+    proportion_cavalry = cavalry_battles / total_battles
+  ) |>
+  filter(proportion_cavalry > 0)
 
-naval_battle_provinces
+land_prop_cavalry_plot <- 
+ggplot(land_prop_cavalry, aes(x = year, y = proportion_cavalry)) +
+  geom_point() + geom_smooth() +
+   scale_y_log10() +
+  labs(
+    title = "Proportion of LAND Battles Involving Cavalry Over Years",
+    x = "Year",
+    y = "Proportion of Cavalry LAND Battles"
+  )
+land_prop_cavalry_plot
 
-
-
-naval_province_battle_tibble <- warringstate |>
-  filter(province == naval_battle_provinces) |>
-  group_by(province, naval_or_land) |>
-  summarize(war_count = n())
-naval_province_battle_tibble
-
-naval_province_battle_tibble |>
-  ggplot(mapping = aes(x = province, y = war_count, fill = naval_or_land)) +
-  geom_col(position = "dodge")
+grid.arrange(total_prop_cavalry_plot, inland_prop_cavalry_plot, ncol = 2)
 ```
+Analysis 2:
+From these tibbles and plots we can see that there is a sharp increase in the total number of cavalry battles. However, not only is there no significant increase in the proportion of cavalry-involved battles, but the trend in the cavalry proportion in LAND BATTLES matches the smoothline of trend in the total cavalry proportion change. 
+Therefore, we cannot conclude that the increase in total number of land battles is caused by the increase in cavalry. There is no correlation between the rise in LAND battle numbers and the rise in cavalry.
+Additionally, looking at the small proportion cavalry has in all battles, we may say that there is no significant relationship between the rise in total battle numbers and cavalry battle numbers we should pay attention to. 
 
+```{r}
+warringstate <- warringstate |>
+  select(-cavalryA, -cavalryB, -inland_provinces, -near_shore_provinces, -whaling_provinces)
 
-
+```
