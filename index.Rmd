@@ -26,9 +26,6 @@ The nature of these conflicts, whether sieges or otherwise, might further provid
 A consistent pattern in these findings will either support or refute my hypothesis regarding the role of whaling in shaping regional conflicts during the period.
 
 ```{r}
-install.packages("gridExtra")
-library(gridExtra)
-
 library(tidyverse)
 library(broom)
 library(infer)
@@ -213,15 +210,10 @@ ggplot(land_prop_cavalry, aes(x = year, y = proportion_cavalry)) +
   )
 land_prop_cavalry_plot
 
-grid.arrange(total_prop_cavalry_plot, inland_prop_cavalry_plot, ncol = 2)
 ```
 Analysis 2:
 From these tibbles and plots we can see that there is a sharp increase in the total number of cavalry battles. However, not only is there no significant increase in the proportion of cavalry-involved battles, but the trend in the cavalry proportion in LAND BATTLES matches the smoothline of trend in the total cavalry proportion change. 
 Therefore, we cannot conclude that the increase in total number of land battles is caused by the increase in cavalry. There is no correlation between the rise in LAND battle numbers and the rise in cavalry.
 Additionally, looking at the small proportion cavalry has in all battles, we may say that there is no significant relationship between the rise in total battle numbers and cavalry battle numbers we should pay attention to. 
 
-```{r}
-warringstate <- warringstate |>
-  select(-cavalryA, -cavalryB, -inland_provinces, -near_shore_provinces, -whaling_provinces)
 
-```
