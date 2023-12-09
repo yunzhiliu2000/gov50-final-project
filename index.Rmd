@@ -15,16 +15,6 @@ editor_options:
 I use the data from this study: #Nicholas D.
 Anderson, "Introducing the Warring States Japan Battle Data," International Interactions, Latest articles (2022) <https://doi.org/10.1080/03050629.2023.2149514>
 
-I aim to explore the correlation between the intensity of whaling activities and the frequency and nature of conflicts during Japan's Warring States era.
-Whaling, deeply rooted in Japanese culture and economy, might have played a pivotal role in influencing conflicts, particularly in significant whaling ports like Taiji, Owase, Ayukawa, and Wadaura.
-Drawing from battle datasets of the era, I intend to classify regions based on whaling activity intensity (high, medium, low) and analyze the ensuing conflict patterns.
-Specifically, my outcome variables will be the count of conflicts and their nature (siege vs. non-siege).
-\
-I'll visualize the relationship between whaling intensity and conflict frequency, as well as the conflict type.
-Through regression analyses, I'll determine if there's a significant causal link, with a positive coefficient suggesting regions with pronounced whaling activities witnessed more conflicts and vice versa.
-The nature of these conflicts, whether sieges or otherwise, might further provide insights into the strategic significance of these whaling hubs.
-A consistent pattern in these findings will either support or refute my hypothesis regarding the role of whaling in shaping regional conflicts during the period.
-
 ```{r}
 library(tidyverse)
 library(broom)
@@ -33,105 +23,49 @@ library(readr)
 
 rm(warstate)
 
-WarringStatesJapan_battledataV1 <- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_battledataV1.csv")
+battledata <- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_battledataV1.csv")
 # View(WarringStatesJapan_battledataV1)
+
+dyadic_data <- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_diffusiondata_dyadic.csv")
+
+monadic_data<- read_csv("~/Desktop/harvard/GOV50/final project potential dataset/WSJBData/WarringStatesJapan_diffusiondata_monadic.csv")
+
+battledata <- rename(battledata, province_name = province)
+
+
+warringstate <- merge(battledata, monadic_data, by.x = c('year', 'province_name'), by.y = c('year', 'province'), all.x = TRUE)
 
 ```
 
 ```{r}
-warringstate <- WarringStatesJapan_battledataV1 |>
-  filter(!is.na(province), !is.na(region), !is.na(naval))
+warringstate |>
+  filter(!is.na(province_name), !is.na(region), !is.na(naval))
 
 rm(df)
 
 warringstate$naval <- as.integer(warringstate$naval)
-#Here I am changing the variable into an integer
-
 ```
 
-#1. List out Whaling Provinces & Near-Shore Provinces
+**Getting familiar with Japan's Warring State Battles**
+
+*#Inland or Near-Shore*
+
 ```{r}
+#Define Inland and Near-shore Provinces
 near_shore_provinces <- c("yamashiro", "ise", "harima", "hizen", "kii", "settsu", "bizen", "aki", "chikuzen", "bingo", "buzen", "nagato", "suo", "awa1", "izu", "tsushima", "izumo", "iki", "musashi", "toutoumi", "osumi", "satsuma", "sagami","tosa", "houki", "ecchu", "higo", "hyuuga", "sanuki", "bungo", "iyo", "oki", "noto", "awa2", "awaji", "sado")
 
 inland_provinces <- c("yamato", "tanba", "shinano", "mimasaka", "oumi", "tajima", "kaga", "kawachi", "mino", "owari", "echizen", "kai", "tango", "bicchu", "mutsu", "shimotsuke", "izumi", "shimousa", "kazusa", "kouzuke", "chikugo", "inaba", "hitachi", "echigo", "mikawa", "iga", "wakasa", "dewa", "iwami", "hida", "suruga")
 
-whaling_provinces <- c("hizen", "satsuma", "osumi", "higo", "hyuuga", "bungo",  "kii", "ise", "izumo", "houki", "tosa", "iyo", "bizen", "bingo", "aki", "harima", "iki", "tsushima")
-
 warringstate <- warringstate |>
   mutate(
     geography = case_when(
-    province %in% inland_provinces ~ "inland",
-    province %in% near_shore_provinces ~ "shore"),
+    province_name %in% inland_provinces ~ "inland",
+    province_name %in% near_shore_provinces ~ "shore"),
     battle_geography = if_else(naval == 1, "Naval Battle", "Land Battle"),
-    whaling = if_else(province == whaling_provinces, 1, 0),
     naval = as.factor(naval))
 
-```
 
-
-
-#2. Descriptive Visualizations
-
-2.1 
-
-```{r}
-#number of battles taken place in each province (red = inland province, blue = near shore province)
-totalbattlebyprovince <- warringstate |>
-  group_by(geography, province) |>
-  summarize(count = n())
-knitr::kable(totalbattlebyprovince)
-
-plot_totalbattlebyprovince <- warringstate |>
-ggplot(mapping = aes(x = province)) + 
-  geom_bar(mapping = aes(fill = geography)) +
-  labs(title = "battles in each province by geographical features")
-plot_totalbattlebyprovince
-```
-
-2.2 
-
-```{r}
-#number of battles taken place in whaling provinces
-
-battleinwhalingprovinces <- warringstate |>
-  filter(whaling == 1) |>
-  group_by(province)|>
-  summarize(count = n())
-battleinwhalingprovinces
-
-plot_whalingbyprovince <- warringstate |>
-  filter(province == whaling_provinces) |>
-  ggplot(mapping = aes(x = province)) + 
-  geom_bar(aes(width = 1)) + labs(title = "battles in whaling provinces")
-
-plot_whalingbyprovince
-```
-
-2.2 
-```{r}
-#battles taken place in whaling provinces by province and year
-plot_whalingbyprovinceandyear <- warringstate |>
-  filter(province == whaling_provinces) |>
-ggplot(mapping = aes(x = year, y = province)) +
-  geom_point()
-
-plot_whalingbyprovinceandyear
-
-#battles taken place in all whaling provinces by year, and the proportion of naval battles
-plot_whalingbyyear <- warringstate |>
-  filter(whaling == 1) |>
-  group_by(year, naval) |>
-  summarize(count = n(), .groups = 'drop') |>
-  ggplot(mapping = aes(x = year, y = count, fill = naval)) +
-  geom_bar(stat = "identity")
-
-
-plot_whalingbyyear
-```
-
-2.3 Time & Location
-```{r}
-warringstate |>
+landshore_plot <- warringstate |>
   mutate(shore = if_else(geography == "shore", 1, 0)) |>
   group_by(year, shore) |>
   summarize(count = n(), .groups = 'drop') |>
@@ -139,29 +73,36 @@ warringstate |>
   geom_point() +
   geom_smooth(na.rm = FALSE) +
   facet_wrap(~ shore, labeller = as_labeller(c('0' = 'no. of battles in inland provinces', '1' = 'no. of battles in shore provinces')))
+
+landshore_plot
 ```
-Analysis 1: We see a significant rise in numbers of battles, both in inland provinces and shore provinces, after the 1550s. The rise is proportionally faster/more significant in inland provinces as compared to shore provinces. 
 
-This lead to my question: is the more significant increase in number in inland provinces due to the rise of cavalry? 
+Analysis: We see a significant rise in numbers of battles, both in inland provinces and shore provinces, after the 1550s.
+The rise is proportionally faster/more significant in inland provinces as compared to shore provinces.
 
-2.4 Calvary & Time & Location
+This lead to a question: is the more significant increase in number in inland provinces due to the rise of cavalry?
+
+*#Calvary & Time & Location*
+
 ```{r}
 warringstate <- warringstate |>
   mutate(cavalryA = if_else(str_detect(forcesA, "cavalry"), 1, 0),
          cavalryB = if_else(str_detect(forcesB, "cavalry"), 1, 0),
          cavalry = if_else(cavalryA == 1|cavalryB == 1, 1, 0))
 
-warringstate$cavalry <- ifelse(is.na(warringstate$cavalry), 0, warringstate$cavalry)
-```
-
-```{r}
-warringstate |>
+cavalry_battle <- warringstate |>
   filter(cavalry == 1) |>
   group_by(year)|>
   summarize(count = n()) |>
   ggplot(aes(x = year, y = count))+
   geom_point() +
-  geom_smooth(na.rm = FALSE)
+  geom_smooth(na.rm = FALSE) +
+    labs(
+    title = "Total Number of Cavalry Battles",
+    x = "Year",
+    y = "No. of Cavalry Battles"
+  )
+cavalry_battle
 
 #proportion of cavalry-involved battle each year
 total_prop_cavalry <- warringstate |>
@@ -172,22 +113,17 @@ total_prop_cavalry <- warringstate |>
     proportion_cavalry = cavalry_battles / total_battles
   ) |>
   filter(proportion_cavalry > 0)
-total_prop_cavalry
 
 total_prop_cavalry_plot <-
   ggplot(total_prop_cavalry, aes(x = year, y = proportion_cavalry)) +
   geom_point() + geom_smooth() +
    scale_y_log10() +
   labs(
-    title = "Proportion of Battles Involving Cavalry Over Years",
+    title = "Proportion of Calvary Battles Over Years",
     x = "Year",
     y = "Proportion of Cavalry Battles"
   )
-total_prop_cavalry_plot
-```
 
-
-```{r}
 #proportion of cavalry-involved LAND battle each year
 land_prop_cavalry <- warringstate |>
   filter(naval == 0) |>
@@ -204,16 +140,81 @@ ggplot(land_prop_cavalry, aes(x = year, y = proportion_cavalry)) +
   geom_point() + geom_smooth() +
    scale_y_log10() +
   labs(
-    title = "Proportion of LAND Battles Involving Cavalry Over Years",
+    title = "Proportion of Cavalry LAND Battles Over Years",
     x = "Year",
     y = "Proportion of Cavalry LAND Battles"
   )
-land_prop_cavalry_plot
+
+library(patchwork)
+
+total_prop_cavalry_plot + land_prop_cavalry_plot
 
 ```
-Analysis 2:
-From these tibbles and plots we can see that there is a sharp increase in the total number of cavalry battles. However, not only is there no significant increase in the proportion of cavalry-involved battles, but the trend in the cavalry proportion in LAND BATTLES matches the smoothline of trend in the total cavalry proportion change. 
-Therefore, we cannot conclude that the increase in total number of land battles is caused by the increase in cavalry. There is no correlation between the rise in LAND battle numbers and the rise in cavalry.
-Additionally, looking at the small proportion cavalry has in all battles, we may say that there is no significant relationship between the rise in total battle numbers and cavalry battle numbers we should pay attention to. 
 
+Analysis: Although there is a sharp increase in the total number of cavalry battles form the 1560s to the 1600s, there is no significant increase in the proportion of cavalry-involved battles.
+Additionally, the proportion of cavalry battles is so small over all recorded years indicates that there is no significant relationship between the rise in total battle numbers and cavalry battle numbers we should pay attention to.
+Therefore, we cannot conclude that the increase in total number of battles is caused by the increase in cavalry.
+Neither is there any observable correlation between the rise in inland battle numbers and the rise in cavalry.
+Therefore, we do not have sufficient information to say that the significant increase in number of battles in inland provinces is correlated to due to the rise of cavalry.
 
+Nevertheless, the trend in the cavalry proportion in inland battles matches the smoothline in the total cavalry proportion change over years.
+This observation reinforces the common assumption that cavalries tend to participate in purely inland battles, although Japan is a rather small archipelago.
+
+*#Road Battle*
+
+Anderson in his paper narrates that, "adjacent_battle simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; road_battle adds the condition that this adjacent province also shares a major road with the province in question." (Anderson, 7) This inspires me to compare the numbers of adjacent_battle and road_battle overtime, to see if there is any divergent in the change in battle numbers that may indicate an improvement in road infrastructure correlated to a rise in road battle numbers.
+
+```{r}
+battle_summary <- warringstate |>
+  group_by(year) |>
+  summarize(road_battles = sum(road_battle, na.rm = TRUE),
+            adjacent_battles = sum(adjacent_battle, na.rm = TRUE))
+
+road_vs_adjacent <- battle_summary |>
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = road_battles, color = "Road Battles"), size = 1.2, alpha = 1) +
+  geom_line(aes(y = adjacent_battles, color = "Adjacent Battles"), size = 1.2, alpha = 0.8) +
+  scale_color_manual(values = c("Road Battles" = "blue", "Adjacent Battles" = "indianred1")) +
+  labs(title = "Road Battles vs Adjacent Battles",
+       x = "Year", y = "Number of Battles",
+       color = "Battle Type") 
+road_vs_adjacent
+
+```
+
+Analysis: From this plot, we can observe that over time there are similar trends in the frequency of battles taking place where major road connections exist and simply with adjacent states.
+It is therefore hard to conclude that an improvement in road infrastructure correlated to a rise in road-specific battles, since adjacent battle numbers always rise and fall together with the number of road battles.
+
+**Regression**
+
+*#Predicting Terrain Ruggedness based on Battle features Naval, Siege, and Cavalry*
+
+```{r}
+model_terrain <- 
+  lm(terrain_ruggedness ~ naval + siege + cavalry, data = warringstate)
+summary(model_terrain)
+```
+
+```{r}
+modelsummary::modelsummary(model_terrain,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+```{r}
+tidy_model_terrain <- tidy(model_terrain)
+
+ggplot(tidy_model_terrain, aes(x = term, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = estimate - std.error, ymax = estimate + std.error), width = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Regression Coefficients of Model 1: Terrain Ruggedness",
+       x = "Predictors",
+       y = "Coefficient Estimate") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Analysis & Interpretation:
