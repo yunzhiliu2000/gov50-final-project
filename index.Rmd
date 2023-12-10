@@ -51,7 +51,7 @@ warringstate$naval <- as.integer(warringstate$naval)
 *#Inland or Near-Shore*
 
 ```{r}
-#Define Inland and Near-shore Provinces
+#Defining Inland and Near-shore Provinces
 near_shore_provinces <- c("yamashiro", "ise", "harima", "hizen", "kii", "settsu", "bizen", "aki", "chikuzen", "bingo", "buzen", "nagato", "suo", "awa1", "izu", "tsushima", "izumo", "iki", "musashi", "toutoumi", "osumi", "satsuma", "sagami","tosa", "houki", "ecchu", "higo", "hyuuga", "sanuki", "bungo", "iyo", "oki", "noto", "awa2", "awaji", "sado")
 
 inland_provinces <- c("yamato", "tanba", "shinano", "mimasaka", "oumi", "tajima", "kaga", "kawachi", "mino", "owari", "echizen", "kai", "tango", "bicchu", "mutsu", "shimotsuke", "izumi", "shimousa", "kazusa", "kouzuke", "chikugo", "inaba", "hitachi", "echigo", "mikawa", "iga", "wakasa", "dewa", "iwami", "hida", "suruga")
@@ -81,6 +81,18 @@ Analysis: We see a significant rise in numbers of battles, both in inland provin
 The rise is proportionally faster/more significant in inland provinces as compared to shore provinces.
 
 This lead to a question: is the more significant increase in number in inland provinces due to the rise of cavalry?
+
+```{r}
+battledata <- battledata |>
+  mutate(forcesA_recode = if_else(forcesA == "1,200~2,000",
+                                  "1600", forcesA_recode),
+         forcesA_recode = if_else(forcesA == "1,400~3,000",
+                                  "2200", forcesA_recode))
+```
+
+```{r}
+lm(victoryA ~ forcesA_recode + forcesB_recode + casualtiesA + casualtiesB)
+```
 
 *#Calvary & Time & Location*
 
@@ -159,6 +171,19 @@ Therefore, we do not have sufficient information to say that the significant inc
 
 Nevertheless, the trend in the cavalry proportion in inland battles matches the smoothline in the total cavalry proportion change over years.
 This observation reinforces the common assumption that cavalries tend to participate in purely inland battles, although Japan is a rather small archipelago.
+
+*#Cavalry and terrain ruggedness*
+```{r}
+cavalry_terrain <- 
+  lm(cavalry ~ terrain_ruggedness + neighbors + road_battle + area + year, data = warringstate)
+summary(cavalry_terrain)
+```
+```{r}
+modelsummary::modelsummary(cavalry_terrain,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
 
 *#Road Battle*
 
