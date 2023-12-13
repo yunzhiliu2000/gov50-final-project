@@ -16,23 +16,32 @@ I use the data from this study:
 
 Nicholas D. Anderson, "Introducing the Warring States Japan Battle Data," International Interactions, Latest articles (2022) <https://doi.org/10.1080/03050629.2023.2149514>
 
-I am combining three datasets from the same study to conduct my regression tests.
-These are the variables I am going to mainly look at.
+My key research question is: How did geographic features and recent conflicts in adjacent provinces influence battle strategies and outcomes in Japan's Warring States period?
 
-| Name                 | Description                                             |
-|:----------------------|:------------------------------------------------|
-|                      |                                                         |
-|                      |                                                         |
-| `province`           | name of the province where the battle took place.       |
-| `area`               | area of the province                                    |
-| `terrain_ruggedness` | the terrain ruggedness of the province                  |
-| `forcesA`            | the forces of side A that participated in the battle    |
-| `forcesB`            | the forces of side B that participated in the battle    |
-| `coalitionA`         | whether side A fought in a formed coalition with others |
-| `coalitionB`         | whether side B fought in a formed coalition with others |
-| `naval`              | whether the battle was a naval battle                   |
-| `siege`              | whether the battle was a siege                          |
-| `year`               | The year in which the battle observation was initiated  |
+My hypothesis is that provinces' geographic characteristics (terrain ruggedness, purely inland or near shore, adjacency to recently conflicted areas), could have influenced strategies (use of cavalries) and outcomes (number of casualties).
+
+This is important as it provides insights into how geography and regional conflict dynamics influenced historical warfare.
+
+My study is cross-sectional, as it analyzes data collected from a specific point in time (1467 - 1600) without manipulating the environment, and does not have any intervention or treatment.
+I assume this is typical in the study of history, when we are dealing with pre-modern historical data.
+
+I am combining three datasets from the same study to conduct my regression tests.
+These are the pre-existing variables I am going to mainly look at.
+
+| Name                        | Description                                                                   |
+|:----------------------|:-----------------------------------------------|
+| `battle`                    | binary variable, 1 indicating the occurence of a battle                       |
+| `adjacent_battle`           | binary variable, whether there had been a recent battle in adjacent provinces |
+| `province_name`             | name of the province where the battle took place.                             |
+| `area`                      | area of the province                                                          |
+| `terrain_ruggedness`        | the terrain ruggedness of the province                                        |
+| `forcesA` `forcesB`         | the forces of side A or B that participated in the battle                     |
+| `casualtiesA` `casualtiesB` | the casualties on side A or B                                                 |
+| `coalitionA` `coalitionB`   | whether side A or B formed coalition with others                              |
+| `neighbor`                  | number of neighboring provinces                                               |
+| `naval`                     | whether the battle was a naval battle                                         |
+| `siege`                     | whether the battle was a siege                                                |
+| `year`                      | The year in which the battle observation was initiated                        |
 
 ```{r}
 library(tidyverse)
@@ -87,19 +96,6 @@ Therefore, we need to first look at the data, do some cleaning (I am converting 
 
 **Descriptive: Getting familiar with Japan's Warring State Battles**
 
-#Where did most of the battles take place?
-
-```{r}
-tb_most_battle_provinces <- 
-  warringstate|>
-  group_by(province_name) |>
-  drop_na(province_name) |>
-  summarise(count = n()) |>
-  top_n(10, count) |>
-  arrange(desc(count)) 
-knitr::kable(tb_most_battle_provinces, title = "provinces where the most battles took place")
-
-```
 
 1.  *Inland or Near-Shore*
 
@@ -125,7 +121,40 @@ warringstate <- warringstate |>
     battle_geography = if_else(naval == 1, "Naval Battle", "Land Battle"),
     naval = as.factor(naval))
 
-#count the total number of battles in inland provinces and shore provinces
+```
+
+Where did most of the battles take place?
+
+```{r}
+tb_most_battle_provinces <- 
+  warringstate|>
+  group_by(province_name) |>
+  drop_na(province_name) |>
+  summarise(count = n()) |>
+  top_n(10, count) |>
+  arrange(desc(count)) 
+knitr::kable(tb_most_battle_provinces, title = "provinces where the most battles took place")
+
+```
+
+From least to most, where did the battles take place?
+```{r}
+plot_provinces <- warringstate |>
+  drop_na(province_name) |>
+  group_by(province_name, geography) |>
+  summarise(count = n()) |>
+  arrange(desc(count)) |>
+  ggplot(aes(x = reorder(province_name, count), y = count, fill = geography)) +
+  geom_bar(stat = "identity", binwidth = 1) +
+  labs(x = "Province", y = "Count of Battles", fill = "Geography") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 0.5))
+
+plot_provinces
+
+```
+
+```{r}
+#count the total number of battles in inland provinces and shore provinces}
 tb_inlandshore <- warringstate |>
   group_by(geography) |>
   count() |>
@@ -149,12 +178,11 @@ Analysis:
 
 We see a significant rise in numbers of battles after the 1550s, and the number of battles peaking at around 1580s, both in inland provinces and shore provinces.
 
-We also see a much higher number of shore-province battles in the 1467s (the beginning of the warring state period), which may be an indicator that in the beginning of the time period, these battles were not so politically charged and complex in their reasons for taking place: instead, people fought simply out of necessity, for resources, which mostly came from the sea in the case of premodern Japan.
-It may also be reflect the development of inland fighting technologies from the 1467s to the 1500s, which results in a proportional rise in inland battles (a proportional decrease in near-shore battles.)
+We also see a much higher number of shore-province battles in the beginning of the warring state period, which may be an indicator that by then, these battles were not so politically charged but simply out of necessity--for resources, which, in the case of premodern Japan, mostly came from the sea.
 
-(Side Note: I decided to not use the area plot to demonstrate the proportions because there are 124 battles which took place in provinces unknown (aka, geography = NA).
-Although the number is comparatively small and should not significantly impact the general trends as shown here in these smoothed-lines, they do play a role if I were to make an area plot.
-)
+It may also be reflect the development of warring technologies from the 1467s to the 1500s, which results in a proportional rise in inland battles.
+
+*Side Note: I decided to not use the area plot to demonstrate the proportions because there are 124 battles which took place in provinces unknown (aka, geography = NA). Although the number is comparatively small, and should not significantly impact the general trends as shown here in these smoothed-lines, they do play a role if I were to make an area plot with the y-axis being 1.)*
 
 2.  *Technical advancement in battle: Cavalry*
 
@@ -249,27 +277,39 @@ tidy(lm_cavalry) |>
 
 summary(lm_cavalry)
 ```
-
-*#Whether a battle tends to take place more often on rugged or none rugged terrains, (holding constant year, etc.)*
-
-```{r}
-battle_likelyhood <- lm(battle ~ terrain_ruggedness + road_battle + area + year + neighbors, data = warringstate)
-summary(battle_likelyhood)
-```
+Analysis:
+The positive coefficient (7.029) suggests a baseline presence of cavalry in battles, which is statistically significant (p = 0.006), but not meaningful or interesting in reality.
+The negative coefficient -0.055 of variable `adjacent_battle` suggests that, holding constant the time (year) and the number of adjacent provinces (neighbors), the existence of a recent battle in adjacent provinces is associated to a slight decrease in the likelihood of cavalry use in a current battel. However, this is not statistically significant (p = 0.745), meaning that we can't confidently infer this correlation.
+This suggests that over time, the presence of cavalry in battles decreased, but there is no strong evidence from this model to suggest that the presence of cavalry is influenced by conflicts in neighboring provinces or the number of neighboring provinces.
 
 *#Whether victory of either side (I will do the same test for both Victory A and Victory B) is correlated to the use of cavalry in the battle, holding constanct whether either side is joined by coalition, and who initiated the fight.*
 
 ```{r}
 victory_a <- lm(victoryA ~ cavalryA + cavalryB + coalitionA + coalitionB, data = warringstate)
-summary(victory_a)
-```
-
-```{r}
 victory_b <- lm(victoryB ~ cavalryB + cavalryA + coalitionB + coalitionA, data = warringstate)
+
+tidy(victory_a) |> 
+  knitr::kable(digits = 3, title = "VictoryA")
+summary(victory_a)
+
+tidy(victory_b) |> 
+  knitr::kable(digits = 3, title = "VictoryB")
 summary(victory_b)
 ```
+Analysis:
 
-*#Whether the number of total casualties is correlated to the usage of cavalry, whether the battle was naval, a siege, and whether there were years of peace `peace_years`, and the terrain ruggedness. (Note that this result is not so reliable, because there is missing data of casualties for battles on either or both sides.)*
+The intercept is significant in both models, indicating the base probability of victory when all other variables are zero, which is not very meaningful, as the divide between who is recorded as side A and who is side B, is purely arbitrary.
+
+For victory_a, none of the variables are statistically significant at the conventional 0.05 p-level, suggesting that neither the use of cavalry by either side nor the presence of a coalition has a statistically significant correlation with victory for side A.
+
+For victory_b, only `coalitionA` has a statistically significant negative coefficient (-0.254) at the 0.05 level, indicating that when side A is joined by a coalition (holding constant whether side B is joined by a coalition and whether either side uses cavalry), it is correlated with a decrease in the probability of victory for side B. 
+
+Other coefficients in both models are not statistically significant, implying no clear evidence of their influence on the probability of victory given the data provided. 
+
+We must, again, emphasize the limitation of our data: we only have a tiny number of battles with recorded cavalry usage and coalitions. All others are NAs.
+
+
+*#Whether the number of total casualties is correlated to the geographical features of a battlefield. (Note that this result is not so reliable, because there is missing data of casualties for battles on either or both sides, and also I am cleaning the data further.)*
 
 ```{r}
 casualties_data_type <- unique(c(warringstate$casualtiesA, warringstate$casualtiesB)) |> head() 
@@ -334,12 +374,24 @@ warringstate <-
 
 Now we have finished the recoding, we can weave together a regression.
 
-I aim to look at whether the number of total casualties is correlated to the usage of cavalry, whether the battle was naval, a siege, and whether there were years of peace `peace_years`, the geography of the battle location, and the terrain ruggedness.
+I aim to look at whether the number of total casualties is correlated to the geographical features of where the battle take place: how rugged was the land, and whether there had been wars in adjacent provinces recently, and the geography (inland or near-shore) of the battle location.
 
 ```{r}
 lm_casualties <- 
-  lm(sum_casualties ~ cavalry + siege + peace_years + geography + terrain_ruggedness, data = warringstate)
+  lm(sum_casualties ~ terrain_ruggedness + geography + adjacent_battle, data = warringstate)
 summary(lm_casualties)
+tidy(lm_casualties) |> 
+  knitr::kable(digits = 3)
 ```
 
 Analysis & Interpretation:
+Again, just like what happened in the lm model for victory_a, none of the variables of battlefield geographical features I am looking at hear, is statistically significant at the 0.05 p-level. 
+The coefficient of 1.563 for terrain ruggedness, suggests a slight increase in total casualties is correlated to more rugged terrain. But the p-value of 0.861 indicates this is not statistically significant.
+The coefficient of -1925.768 for geography (shore) suggests that battles taking places in provinces near the shore may be associated with fewer casualties compared to inland battles, but again, with a high p-value of 0.180, this is not statistically significant.
+The coefficient of 391.376 for variable `adjacent_battle` indicates a possible increase in casualties associated with recent battles in adjacent provinces, but the p-value of 0.861 indicates no statistical significance.
+
+These suggest that, unfortunately, we cannot find clear evidence from our limited data that these geographical features have a statistically significant correlation with the total number of casualties in the battles studied.
+Especially, with vague data from historical documents being further abstracted for the purpose of calculation (which is what I did during data cleaning), makes these outcomes less meaningful and trustworthy. 
+The field of digital humanities is filled with unprocessed data, many of which is vague in nature and unable to be checked in the near future. 
+However, statistical thinking, I believe, should still be more valued when doing historical analysis and interpretations. 
+
