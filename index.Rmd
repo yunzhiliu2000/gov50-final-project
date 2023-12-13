@@ -20,7 +20,7 @@ I am combining three datasets from the same study to conduct my regression tests
 These are the variables I am going to mainly look at.
 
 | Name                 | Description                                             |
-|:------------------|:----------------------------------------------------|
+|:-------------------|:---------------------------------------------------|
 | `battle`             | binary variable indicating the occurence of a battle    |
 | `battle_id`          | unique numerical identification of a battle             |
 | `province`           | name of the province where the battle took place.       |
@@ -131,19 +131,11 @@ landshore_plot <- warringstate |>
   geom_smooth(na.rm = FALSE) +
   facet_wrap(~ shore, labeller = as_labeller(c('0' = 'no. of battles in inland provinces', '1' = 'no. of battles in shore provinces')))
 landshore_plot
+```
 
-#plot the proportion of battles in inland provinces and shore provinces over years
-landshore_prop <- warringstate |>
-  mutate(shore = if_else(geography == "shore", 1, 0)) |>
-  filter(!is.na(shore)) |>
-  group_by(year, shore) |>
-  summarize(count = n(), .groups = 'drop') |>
-  ggplot(aes(x = year, y = count/n(warringstate))) +
-  geom_point() +
-  geom_smooth(na.rm = FALSE) +
-  facet_wrap(~ shore, labeller = as_labeller(c('0' = 'prop of battles in inland provinces', '1' = 'prop of battles in shore provinces')))
-
-landshore_prop
+```{r}
+# Count battles per year for each geography
+xxxx
 ```
 
 Analysis:
@@ -229,22 +221,13 @@ Analysis:
 The proportion of cavalry battles is so small over all recorded years, which makes me less confident to interpret the first "number of cavalry battles over years" plot as precisely representative of the history.
 
 However, the smooth line in the proportion plot is indicative of the general trend of cavalry use over the years.
-The observation of the sharp rise in cavalry proportion from the 1450s to the 1500s, matches with our assumption that the rise in cavalry
-
-*#Cavalry and terrain ruggedness*
-
-Here I am looking at whether the usage of cavalry is correlated to the terrain ruggedness of the province of battle, holding constant other variables such as `road_battle` (whether the battle was on a major road instead of between adjacent provinces), the `area` (size of the province), `year`, and `neighbors` (how many neighboring provinces was this province adjacent to.)
-
-```{r}
-cavalry_terrain <- 
-  lm(cavalry ~ terrain_ruggedness + road_battle + area + year + neighbors, data = warringstate)
-summary(cavalry_terrain)
-```
-
+The observation of the sharp rise in cavalry proportion from the 1450s to the 1500s, matches with our assumption that the rise in cavalry......
 
 *#Road Battle*
 
-Anderson in his paper narrates that, "adjacent_battle simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; road_battle adds the condition that this adjacent province also shares a major road with the province in question." (Anderson, 7) This inspires me to compare the numbers of adjacent_battle and road_battle overtime, to see if there is any divergent in the change in battle numbers that may indicate an improvement in road infrastructure correlated to a rise in road battle numbers.
+Anderson in his paper narrates that, "`adjacent_battle` simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; `road_battle` adds the condition that this adjacent province also shares a major road with the province in question." (Anderson, 7)
+
+This inspires me to compare the numbers of `adjacent_battle` and `road_battle` overtime, to see if there is any divergent in the change in battle numbers that may indicate an improvement in road infrastructure correlated to a rise in road battle numbers.
 
 ```{r}
 battle_summary <- warringstate |>
@@ -267,36 +250,43 @@ road_vs_adjacent
 Analysis: From this plot, we can observe that over time there are similar trends in the frequency of battles taking place where major road connections exist and simply with adjacent states.
 It is therefore hard to conclude that an improvement in road infrastructure correlated to a rise in road-specific battles, since adjacent battle numbers always rise and fall together with the number of road battles.
 
+*#Cavalry and terrain ruggedness*
+
+Here I am looking at whether the usage of cavalry is correlated to the terrain ruggedness of the province of battle, holding constant other variables such as `road_battle` (whether the battle was on a major road instead of between adjacent provinces), the `area` (size of the province), `year`, and `neighbors` (how many neighboring provinces was this province adjacent to.)
+
+```{r}
+cavalry_terrain <- 
+  lm(cavalry ~ terrain_ruggedness + road_battle + area + year + neighbors, data = warringstate)
+summary(cavalry_terrain)
+```
+
 **Regression**
 
-*#Predicting Terrain Ruggedness based on Battle features Naval, Siege, and Cavalry*
+*#Whether a battle tends to take place more often on rugged or none rugged terrains, (holding constant year, etc.)*
 
 ```{r}
-model_terrain <- 
-  lm(terrain_ruggedness ~ naval + siege + cavalry, data = warringstate)
-summary(model_terrain)
+battle_likelyhood <- lm(battle ~ terrain_ruggedness + road_battle + area + year + neighbors, data = warringstate)
+summary(battle_likelyhood)
 ```
 
+*#Whether VictoryA is correlated to the use of cavalry in the battle, whether either side is joined by coalition, and who initiated the fight.*
+
 ```{r}
-modelsummary::modelsummary(model_terrain,
-                           statistic = c("s.e. = {std.error}",
-                                         "p = {p.value}"),
-                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+victory_a <- lm(victoryA ~ cavalryA + cavalryB + coalitionA + coalitionB + initiatorA, data = warringstate)
+summary(victory_a)
 ```
 
+*#Whether the number of draws are correlated to the use of cavalry (holding constant coalition, etc.)*
+
+```{}
+```
+
+*#Whether the number of total casualties is correlated to the usage of cavalry (Note that this result is not so reliable, because there are could be missing data of casualties for battles on either or both sides.)*
+
 ```{r}
-tidy_model_terrain <- tidy(model_terrain)
-
-ggplot(tidy_model_terrain, aes(x = term, y = estimate)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = estimate - std.error, ymax = estimate + std.error), width = 0.2) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-  labs(title = "Regression Coefficients of Model 1: Terrain Ruggedness",
-       x = "Predictors",
-       y = "Coefficient Estimate") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+casualties_data_type <- unique(c(warringstate$casualtiesA, warringstate$casualtiesB)) |>
+  tibble() 
+knitr::kable(casualties_data_type, caption = "Types of Casualties in this data")
 ```
 
 Analysis & Interpretation:
