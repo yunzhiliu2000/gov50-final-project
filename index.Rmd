@@ -20,7 +20,7 @@ I am combining three datasets from the same study to conduct my regression tests
 These are the variables I am going to mainly look at.
 
 | Name                 | Description                                             |
-|:-------------------|:---------------------------------------------------|
+|:---------------------|:-------------------------------------------------|
 | `battle`             | binary variable indicating the occurence of a battle    |
 | `battle_id`          | unique numerical identification of a battle             |
 | `province`           | name of the province where the battle took place.       |
@@ -133,9 +133,7 @@ landshore_plot <- warringstate |>
 landshore_plot
 ```
 
-```{r}
-# Count battles per year for each geography
-xxxx
+```{# Count battles per year for each geography}
 ```
 
 Analysis:
@@ -213,6 +211,10 @@ total_prop_cavalry_plot <-
     y = "Proportion of Cavalry Battles"
   )
 
+```
+
+```{r}
+install.packages("patchwork")
 cavalry_battle + total_prop_cavalry_plot
 ```
 
@@ -278,7 +280,7 @@ summary(victory_a)
 
 *#Whether the number of draws are correlated to the use of cavalry (holding constant coalition, etc.)*
 
-```{}
+```         
 ```
 
 *#Whether the number of total casualties is correlated to the usage of cavalry (Note that this result is not so reliable, because there are could be missing data of casualties for battles on either or both sides.)*
