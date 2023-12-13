@@ -1550,8 +1550,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 These are the variables I am going to mainly look at.</p>
 <table>
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 69%" />
+<col style="width: 31%" />
+<col style="width: 68%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1561,12 +1561,12 @@ These are the variables I am going to mainly look at.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><code>battle</code></td>
-<td style="text-align: left;">binary variable indicating the occurence of a battle</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><code>battle_id</code></td>
-<td style="text-align: left;">unique numerical identification of a battle</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><code>province</code></td>
@@ -1645,7 +1645,7 @@ I will also do several other column dropping to make the data more workable, spe
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>warringstate</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='op'>-</span><span class='va'>sideA</span>, <span class='op'>-</span><span class='va'>sideB</span>, <span class='op'>-</span><span class='va'>location</span>, <span class='op'>-</span><span class='va'>day</span>, <span class='op'>-</span><span class='va'>day2</span>, <span class='op'>-</span><span class='va'>month</span>, <span class='op'>-</span><span class='va'>month2</span>, <span class='op'>-</span><span class='va'>source</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/distinct.html'>distinct</a></span><span class='op'>(</span><span class='va'>battle_id</span>, .keep_all <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span></code></pre>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/distinct.html'>distinct</a></span><span class='op'>(</span><span class='va'>battle_id</span>, .keep_all <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span> </span></code></pre>
 </div>
 </div>
 <p>Now we have a data set with 2889 unique battles!</p>
@@ -1654,10 +1654,81 @@ I will also do several other column dropping to make the data more workable, spe
 Such is the limitation of digital humanities (or, if you count history as social sciences, you should be having a hard time understanding the reality of data availability after GOV50 as I am now).</p>
 <p>Therefore, we need to first look at the data, do some cleaning (I am converting several variables into binary variables), before attempting at any regression.</p>
 <p><strong>Descriptive: Getting familiar with Japan’s Warring State Battles</strong></p>
+<p>#Where did most of the battles take place?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>tb_most_battle_provinces</span> <span class='op'>&lt;-</span> </span>
+<span>  <span class='va'>warringstate</span><span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>province_name</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/drop_na.html'>drop_na</a></span><span class='op'>(</span><span class='va'>province_name</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarise</a></span><span class='op'>(</span>count <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/top_n.html'>top_n</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='va'>count</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>count</span><span class='op'>)</span><span class='op'>)</span> </span>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>tb_most_battle_provinces</span>, title <span class='op'>=</span> <span class='st'>"provinces where the most battles took place"</span><span class='op'>)</span></span></code></pre>
+</div>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">province_name</th>
+<th style="text-align: right;">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">yamashiro</td>
+<td style="text-align: right;">194</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">settsu</td>
+<td style="text-align: right;">123</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">shinano</td>
+<td style="text-align: right;">120</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mutsu</td>
+<td style="text-align: right;">117</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hizen</td>
+<td style="text-align: right;">114</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">oumi</td>
+<td style="text-align: right;">112</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">yamato</td>
+<td style="text-align: right;">104</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">chikuzen</td>
+<td style="text-align: right;">84</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">aki</td>
+<td style="text-align: right;">82</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">echigo</td>
+<td style="text-align: right;">69</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hyuuga</td>
+<td style="text-align: right;">69</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kawachi</td>
+<td style="text-align: right;">69</td>
+</tr>
+</tbody>
+</table>
+</div>
 <ol type="1">
 <li><em>Inland or Near-Shore</em></li>
 </ol>
-<p>Since the frequency of battles in each provinces and regions have been analyzed by the author himself already, I am now interested, instead, in learning about whether battles took place more often in purely inland provinces or near-shore provinces.</p>
+<p>I am now interested about whether battles took place more often in purely inland provinces or near-shore provinces.</p>
 <p>I am curious about this because of Japan’s geographical feature as an archipelago.
 I therefore wonder if we can see a significant difference in the total number of conflicts taking place in purely inland locations versus near shore provinces, even if not naval battles.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1666,12 +1737,10 @@ I therefore wonder if we can see a significant difference in the total number of
 <span></span>
 <span><span class='va'>near_shore_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"yamashiro"</span>, <span class='st'>"ise"</span>, <span class='st'>"harima"</span>, <span class='st'>"hizen"</span>, <span class='st'>"kii"</span>, <span class='st'>"settsu"</span>, <span class='st'>"bizen"</span>, <span class='st'>"aki"</span>, <span class='st'>"chikuzen"</span>, <span class='st'>"bingo"</span>, <span class='st'>"buzen"</span>, <span class='st'>"nagato"</span>, <span class='st'>"suo"</span>, <span class='st'>"awa1"</span>, <span class='st'>"izu"</span>, <span class='st'>"tsushima"</span>, <span class='st'>"izumo"</span>, <span class='st'>"iki"</span>, <span class='st'>"musashi"</span>, <span class='st'>"toutoumi"</span>, <span class='st'>"osumi"</span>, <span class='st'>"satsuma"</span>, <span class='st'>"sagami"</span>,<span class='st'>"tosa"</span>, <span class='st'>"houki"</span>, <span class='st'>"ecchu"</span>, <span class='st'>"higo"</span>, <span class='st'>"hyuuga"</span>, <span class='st'>"sanuki"</span>, <span class='st'>"bungo"</span>, <span class='st'>"iyo"</span>, <span class='st'>"oki"</span>, <span class='st'>"noto"</span>, <span class='st'>"awa2"</span>, <span class='st'>"awaji"</span>, <span class='st'>"sado"</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='va'>inland_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"yamato"</span>, <span class='st'>"tanba"</span>, <span class='st'>"shinano"</span>, <span class='st'>"mimasaka"</span>, <span class='st'>"oumi"</span>, <span class='st'>"tajima"</span>, <span class='st'>"kaga"</span>, <span class='st'>"kawachi"</span>, <span class='st'>"mino"</span>, <span class='st'>"owari"</span>, <span class='st'>"echizen"</span>, <span class='st'>"kai"</span>, <span class='st'>"tango"</span>, <span class='st'>"bicchu"</span>, <span class='st'>"mutsu"</span>, <span class='st'>"shimotsuke"</span>, <span class='st'>"izumi"</span>, <span class='st'>"shimousa"</span>, <span class='st'>"kazusa"</span>, <span class='st'>"kouzuke"</span>, <span class='st'>"chikugo"</span>, <span class='st'>"inaba"</span>, <span class='st'>"hitachi"</span>, <span class='st'>"echigo"</span>, <span class='st'>"mikawa"</span>, <span class='st'>"iga"</span>, <span class='st'>"wakasa"</span>, <span class='st'>"dewa"</span>, <span class='st'>"iwami"</span>, <span class='st'>"hida"</span>, <span class='st'>"suruga"</span><span class='op'>)</span></span></code></pre>
-</div>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#create new variables</span></span>
+<span><span class='va'>inland_provinces</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"yamato"</span>, <span class='st'>"tanba"</span>, <span class='st'>"shinano"</span>, <span class='st'>"mimasaka"</span>, <span class='st'>"oumi"</span>, <span class='st'>"tajima"</span>, <span class='st'>"kaga"</span>, <span class='st'>"kawachi"</span>, <span class='st'>"mino"</span>, <span class='st'>"owari"</span>, <span class='st'>"echizen"</span>, <span class='st'>"kai"</span>, <span class='st'>"tango"</span>, <span class='st'>"bicchu"</span>, <span class='st'>"mutsu"</span>, <span class='st'>"shimotsuke"</span>, <span class='st'>"izumi"</span>, <span class='st'>"shimousa"</span>, <span class='st'>"kazusa"</span>, <span class='st'>"kouzuke"</span>, <span class='st'>"chikugo"</span>, <span class='st'>"inaba"</span>, <span class='st'>"hitachi"</span>, <span class='st'>"echigo"</span>, <span class='st'>"mikawa"</span>, <span class='st'>"iga"</span>, <span class='st'>"wakasa"</span>, <span class='st'>"dewa"</span>, <span class='st'>"iwami"</span>, <span class='st'>"hida"</span>, <span class='st'>"suruga"</span><span class='op'>)</span></span>
+<span></span>
+<span></span>
+<span><span class='co'>#create new variables</span></span>
 <span><span class='va'>warringstate</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
 <span>    geography <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
@@ -1720,30 +1789,28 @@ I therefore wonder if we can see a significant difference in the total number of
 </div>
 <p><img src="index_files/figure-html5/unnamed-chunk-4-1.png" width="624" /></p>
 </div>
-<p><code>{# Count battles per year for each geography}</code></p>
 <p>Analysis:</p>
 <p>We see a significant rise in numbers of battles after the 1550s, and the number of battles peaking at around 1580s, both in inland provinces and shore provinces.</p>
-<p>We also see a much higher number of shore-province battles in the 1450s (the beginning of the warring state period), which may be an indicator that in the beginning of the time period, these battles were not so politically charged and complex in their reasons for taking place: instead, people fought simply out of necessity, for resources, which mostly came from the sea in the case of premodern Japan.
-It may also be reflect the development of inland fighting technologies from the 1450s to the 1500s, which results in a proportional rise in inland battles (a proportional decrease in near-shore battles.)</p>
+<p>We also see a much higher number of shore-province battles in the 1467s (the beginning of the warring state period), which may be an indicator that in the beginning of the time period, these battles were not so politically charged and complex in their reasons for taking place: instead, people fought simply out of necessity, for resources, which mostly came from the sea in the case of premodern Japan.
+It may also be reflect the development of inland fighting technologies from the 1467s to the 1500s, which results in a proportional rise in inland battles (a proportional decrease in near-shore battles.)</p>
 <p>(Side Note: I decided to not use the area plot to demonstrate the proportions because there are 124 battles which took place in provinces unknown (aka, geography = NA).
 Although the number is comparatively small and should not significantly impact the general trends as shown here in these smoothed-lines, they do play a role if I were to make an area plot.
 )</p>
-<p>This lead to a question: is the more significant increase in number in inland provinces due to the technical advancement for land battle?</p>
 <ol start="2" type="1">
-<li><em>Technical advancement in battle: Calvary</em></li>
+<li><em>Technical advancement in battle: Cavalry</em></li>
 </ol>
-<p>Let’s look at the dataset again and see how to extract the information whether a battle has cavalry involved.</p>
+<p>Let’s look at the dataset and see how to extract the information whether a battle has cavalry involved.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>forces_data_type</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>warringstate</span><span class='op'>$</span><span class='va'>forcesA</span>, <span class='va'>warringstate</span><span class='op'>$</span><span class='va'>forcesB</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span><span class='op'>(</span><span class='op'>)</span> </span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>forces_data_type</span>, caption <span class='op'>=</span> <span class='st'>"Types of Forces in this data"</span><span class='op'>)</span></span></code></pre>
+<span>  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>forces_data_type</span>, caption <span class='op'>=</span> <span class='st'>"Examples of Types of Forces Data"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
-<caption><span id="tab:unnamed-chunk-5">Table 1: </span>Types of Forces in this data</caption>
+<caption><span id="tab:unnamed-chunk-5">Table 1: </span>Examples of Types of Forces Data</caption>
 <thead>
 <tr class="header">
-<th style="text-align: left;">unique(c(warringstate<span class="math inline">\(forcesA, warringstate\)</span>forcesB))</th>
+<th style="text-align: left;">x</th>
 </tr>
 </thead>
 <tbody>
@@ -1765,303 +1832,12 @@ Although the number is comparatively small and should not significantly impact t
 <tr class="even">
 <td style="text-align: left;">3,000 cavalry</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">4000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">142 cavalry, 1,400~1,500 infantry</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">133000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1,400~3,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">100s</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">300000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">8000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">20000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">10,000s</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">4,000 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">10000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">15000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">25000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">3000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">2400</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">100000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">30000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">30,000~40,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">4,000~5,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">33,000~150,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">800 cavalry</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">28000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">200-300 ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">40000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">5000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">80000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">8,000 cavalry</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">18000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">20,000; 500 ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">140 ships</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">70~80 small ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">6,000 cavalry</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">50000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">115000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">78 ships</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">100 ships, 8,000 soldiers</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">60000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">100s ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">7000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">300 cavalry</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">6000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">70000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">38000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">300 ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">9,000 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">5,000~6,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">6 large ships</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">2,000 cavalry</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1,800 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">12000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">600</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">3300</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">42000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">20,000~50,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">33000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">27500</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">13000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">11500</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">57000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">200 ships, 1,000 soldiers</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">16000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">23000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">23,000 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">67800</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">44000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">36300</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">7500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1,200~2,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">8700</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">74,000~75,700</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">43000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">500~600</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">100 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">2,000-3,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2,000~20,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">500</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">21000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">4 ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">45000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">35,000~60,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">20,000~21,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">11000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">400</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">3700</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">17000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1500</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">500 ships</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">600 ships</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">100</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">80 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">17,000~18,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">16,000 cavalry</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">3600</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">82000</td>
-</tr>
 </tbody>
 </table>
 </div>
-<p>We can see that this variable is categorical, with a diversity of information.<br />
-We are mainly interested in those that has “cavalry” involved here.
-I am using the “str_detect” function to create a new variable <code>cavalry</code> denoting whether a battle has cavalry involved, as well as <code>cavalryA</code>, whether side A has cavalry, and <code>cavalryB</code>, whether side B uses cavalry.</p>
+<p>We can see that this variable is categorical, with a diversity of information.
+We are mainly interested in those that has “cavalry” involved here.</p>
+<p>I am using the “str_detect” function to create a new variable <code>cavalry</code> denoting whether a battle has cavalry involved, as well as <code>cavalryA</code>, whether side A has cavalry, and <code>cavalryB</code>, whether side B uses cavalry.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#extracting information about cavalry involved</span></span>
@@ -2136,13 +1912,6 @@ I am using the “str_detect” function to create a new variable <code>cavalry<
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span><span class='op'>(</span>repos <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>CRAN <span class='op'>=</span> <span class='st'>"https://cran.rstudio.com"</span><span class='op'>)</span><span class='op'>)</span></span>
-<span><span class='fu'><a href='https://rdrr.io/r/utils/install.packages.html'>install.packages</a></span><span class='op'>(</span><span class='st'>"patchwork"</span><span class='op'>)</span></span></code></pre>
-</div>
-<pre><code>
-The downloaded binary packages are in
-    /var/folders/pg/fcfg8l8n5q18b4f4fdssk8c00000gn/T//RtmpkxsQXr/downloaded_packages</code></pre>
-<div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://patchwork.data-imaginist.com'>patchwork</a></span><span class='op'>)</span></span>
 <span><span class='va'>cavalry_battle</span> <span class='op'>+</span> <span class='va'>total_prop_cavalry_plot</span></span></code></pre>
 </div>
@@ -2151,65 +1920,85 @@ The downloaded binary packages are in
 <p>Analysis:</p>
 <p>The proportion of cavalry battles is so small over all recorded years, which makes me less confident to interpret the first “number of cavalry battles over years” plot as precisely representative of the history.</p>
 <p>However, the smooth line in the proportion plot is indicative of the general trend of cavalry use over the years.
-The observation of the sharp rise in cavalry proportion from the 1450s to the 1500s, matches with our assumption that the rise in cavalry……</p>
-<p><em>#Road Battle</em></p>
-<p>Anderson in his paper narrates that, “<code>adjacent_battle</code> simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; <code>road_battle</code> adds the condition that this adjacent province also shares a major road with the province in question.” (Anderson, 7)</p>
-<p>This inspires me to compare the numbers of <code>adjacent_battle</code> and <code>road_battle</code> overtime, to see if there is any divergent in the change in battle numbers that may indicate an improvement in road infrastructure correlated to a rise in road battle numbers.</p>
+The observation of the sharp rise in cavalry proportion from the 1467s to the 1500s, matches with our assumption that the rise in cavalry……</p>
+<p><strong>Regression</strong></p>
+<p><em>#Cavalry and recent battle with adjacent province</em></p>
+<p>Here I look at the usage of cavalry’s relationship to whether there had been recent battle with adjacent provinces, holding constant confounders such as <code>year</code>, the number of <code>neighbors</code> (how many neighboring provinces was this province adjacent to.)</p>
+<p>In his paper, Anderson explains, “<code>adjacent_battle</code> simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; <code>road_battle</code> adds the condition that this adjacent province also shares a major road with the province in question.” (Anderson, 7)</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>battle_summary</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>year</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>road_battles <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>road_battle</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>,</span>
-<span>            adjacent_battles <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>adjacent_battle</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>lm_cavalry</span> <span class='op'>&lt;-</span> </span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>cavalry</span> <span class='op'>~</span> <span class='va'>adjacent_battle</span> <span class='op'>+</span> <span class='va'>year</span> <span class='op'>+</span> <span class='va'>neighbors</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span> </span>
 <span></span>
-<span><span class='va'>road_vs_adjacent</span> <span class='op'>&lt;-</span> <span class='va'>battle_summary</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>year</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
-<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>road_battles</span>, color <span class='op'>=</span> <span class='st'>"Road Battles"</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='fl'>1.2</span>, alpha <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>+</span></span>
-<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>adjacent_battles</span>, color <span class='op'>=</span> <span class='st'>"Adjacent Battles"</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='fl'>1.2</span>, alpha <span class='op'>=</span> <span class='fl'>0.8</span><span class='op'>)</span> <span class='op'>+</span></span>
-<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_manual.html'>scale_color_manual</a></span><span class='op'>(</span>values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Road Battles"</span> <span class='op'>=</span> <span class='st'>"blue"</span>, <span class='st'>"Adjacent Battles"</span> <span class='op'>=</span> <span class='st'>"indianred1"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
-<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>title <span class='op'>=</span> <span class='st'>"Road Battles vs Adjacent Battles"</span>,</span>
-<span>       x <span class='op'>=</span> <span class='st'>"Year"</span>, y <span class='op'>=</span> <span class='st'>"Number of Battles"</span>,</span>
-<span>       color <span class='op'>=</span> <span class='st'>"Battle Type"</span><span class='op'>)</span> </span>
-<span><span class='va'>road_vs_adjacent</span></span></code></pre>
+<span><span class='fu'><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></span><span class='op'>(</span><span class='va'>lm_cavalry</span><span class='op'>)</span> <span class='op'>|&gt;</span> </span>
+<span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span>digits <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="index_files/figure-html5/unnamed-chunk-8-1.png" width="624" /></p>
-</div>
-<p>Analysis: From this plot, we can observe that over time there are similar trends in the frequency of battles taking place where major road connections exist and simply with adjacent states.
-It is therefore hard to conclude that an improvement in road infrastructure correlated to a rise in road-specific battles, since adjacent battle numbers always rise and fall together with the number of road battles.</p>
-<p><em>#Cavalry and terrain ruggedness</em></p>
-<p>Here I am looking at whether the usage of cavalry is correlated to the terrain ruggedness of the province of battle, holding constant other variables such as <code>road_battle</code> (whether the battle was on a major road instead of between adjacent provinces), the <code>area</code> (size of the province), <code>year</code>, and <code>neighbors</code> (how many neighboring provinces was this province adjacent to.)</p>
-<div class="layout-chunk" data-layout="l-body">
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">term</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">std.error</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">7.029</td>
+<td style="text-align: right;">2.508</td>
+<td style="text-align: right;">2.802</td>
+<td style="text-align: right;">0.006</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">adjacent_battle</td>
+<td style="text-align: right;">-0.055</td>
+<td style="text-align: right;">0.168</td>
+<td style="text-align: right;">-0.327</td>
+<td style="text-align: right;">0.745</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">year</td>
+<td style="text-align: right;">-0.004</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">-2.551</td>
+<td style="text-align: right;">0.013</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">neighbors</td>
+<td style="text-align: right;">-0.045</td>
+<td style="text-align: right;">0.032</td>
+<td style="text-align: right;">-1.392</td>
+<td style="text-align: right;">0.168</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>cavalry_terrain</span> <span class='op'>&lt;-</span> </span>
-<span>  <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>cavalry</span> <span class='op'>~</span> <span class='va'>terrain_ruggedness</span> <span class='op'>+</span> <span class='va'>road_battle</span> <span class='op'>+</span> <span class='va'>area</span> <span class='op'>+</span> <span class='va'>year</span> <span class='op'>+</span> <span class='va'>neighbors</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span></span>
-<span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>cavalry_terrain</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>lm_cavalry</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 Call:
-lm(formula = cavalry ~ terrain_ruggedness + road_battle + area + 
-    year + neighbors, data = warringstate)
+lm(formula = cavalry ~ adjacent_battle + year + neighbors, data = warringstate)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--0.6920 -0.2238 -0.1596  0.2649  1.0361 
+-0.5780 -0.2493 -0.1867  0.2702  0.9701 
 
 Coefficients:
-                     Estimate Std. Error t value Pr(&gt;|t|)   
-(Intercept)         8.322e+00  2.429e+00   3.427  0.00100 **
-terrain_ruggedness -1.024e-03  8.378e-04  -1.222  0.22542   
-road_battle        -2.554e-02  1.396e-01  -0.183  0.85531   
-area                1.315e-05  5.467e-06   2.406  0.01864 * 
-year               -4.920e-03  1.586e-03  -3.103  0.00272 **
-neighbors          -5.334e-02  2.996e-02  -1.780  0.07911 . 
+                 Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)      7.028512   2.508153   2.802  0.00643 **
+adjacent_battle -0.054860   0.167795  -0.327  0.74461   
+year            -0.004171   0.001635  -2.551  0.01274 * 
+neighbors       -0.045036   0.032354  -1.392  0.16799   
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 0.4113 on 74 degrees of freedom
+Residual standard error: 0.4237 on 76 degrees of freedom
   (2809 observations deleted due to missingness)
-Multiple R-squared:  0.2153,    Adjusted R-squared:  0.1623 
-F-statistic: 4.062 on 5 and 74 DF,  p-value: 0.002595</code></pre>
+Multiple R-squared:  0.1445,    Adjusted R-squared:  0.1107 
+F-statistic: 4.279 on 3 and 76 DF,  p-value: 0.007602</code></pre>
 </div>
-<p><strong>Regression</strong></p>
 <p><em>#Whether a battle tends to take place more often on rugged or none rugged terrains, (holding constant year, etc.)</em></p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2241,51 +2030,76 @@ Residual standard error: 8.202e-16 on 2741 degrees of freedom
 Multiple R-squared:  0.4993,    Adjusted R-squared:  0.4984 
 F-statistic: 546.6 on 5 and 2741 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
-<p><em>#Whether VictoryA is correlated to the use of cavalry in the battle, whether either side is joined by coalition, and who initiated the fight.</em></p>
+<p><em>#Whether victory of either side (I will do the same test for both Victory A and Victory B) is correlated to the use of cavalry in the battle, holding constanct whether either side is joined by coalition, and who initiated the fight.</em></p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>victory_a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>victoryA</span> <span class='op'>~</span> <span class='va'>cavalryA</span> <span class='op'>+</span> <span class='va'>cavalryB</span> <span class='op'>+</span> <span class='va'>coalitionA</span> <span class='op'>+</span> <span class='va'>coalitionB</span> <span class='op'>+</span> <span class='va'>initiatorA</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>victory_a</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>victoryA</span> <span class='op'>~</span> <span class='va'>cavalryA</span> <span class='op'>+</span> <span class='va'>cavalryB</span> <span class='op'>+</span> <span class='va'>coalitionA</span> <span class='op'>+</span> <span class='va'>coalitionB</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span></span>
 <span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>victory_a</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 Call:
-lm(formula = victoryA ~ cavalryA + cavalryB + coalitionA + coalitionB + 
-    initiatorA, data = warringstate)
+lm(formula = victoryA ~ cavalryA + cavalryB + coalitionA + coalitionB, 
+    data = warringstate)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--0.8894 -0.4637  0.1105  0.2382  0.6490 
+-0.8742 -0.4735  0.1258  0.3473  0.5265 
 
-Coefficients: (1 not defined because of singularities)
+Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  0.76179    0.13518   5.635 1.96e-06 ***
-cavalryA    -0.03401    0.22376  -0.152   0.8800    
-cavalryB    -0.24041    0.33865  -0.710   0.4822    
-coalitionA   0.12767    0.15015   0.850   0.4006    
-coalitionB  -0.29808    0.14342  -2.078   0.0447 *  
-initiatorA        NA         NA      NA       NA    
+(Intercept)  0.69491    0.11240   6.182 8.16e-08 ***
+cavalryA     0.06315    0.20637   0.306   0.7607    
+cavalryB    -0.02119    0.27697  -0.076   0.9393    
+coalitionA   0.17927    0.12535   1.430   0.1583    
+coalitionB  -0.22143    0.12030  -1.841   0.0711 .  
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 0.4593 on 37 degrees of freedom
-  (2847 observations deleted due to missingness)
-Multiple R-squared:  0.1304,    Adjusted R-squared:  0.03638 
-F-statistic: 1.387 on 4 and 37 DF,  p-value: 0.2573</code></pre>
+Residual standard error: 0.4586 on 55 degrees of freedom
+  (2829 observations deleted due to missingness)
+Multiple R-squared:  0.08177,   Adjusted R-squared:  0.01499 
+F-statistic: 1.224 on 4 and 55 DF,  p-value: 0.3111</code></pre>
 </div>
-<p><em>#Whether the number of draws are correlated to the use of cavalry (holding constant coalition, etc.)</em></p>
-<pre><code></code></pre>
-<p><em>#Whether the number of total casualties is correlated to the usage of cavalry (Note that this result is not so reliable, because there are could be missing data of casualties for battles on either or both sides.)</em></p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>casualties_data_type</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>warringstate</span><span class='op'>$</span><span class='va'>casualtiesA</span>, <span class='va'>warringstate</span><span class='op'>$</span><span class='va'>casualtiesB</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
-<span>  <span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span><span class='op'>(</span><span class='op'>)</span> </span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>casualties_data_type</span>, caption <span class='op'>=</span> <span class='st'>"Types of Casualties in this data"</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>victory_b</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>victoryB</span> <span class='op'>~</span> <span class='va'>cavalryB</span> <span class='op'>+</span> <span class='va'>cavalryA</span> <span class='op'>+</span> <span class='va'>coalitionB</span> <span class='op'>+</span> <span class='va'>coalitionA</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>victory_b</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>
+Call:
+lm(formula = victoryB ~ cavalryB + cavalryA + coalitionB + coalitionA, 
+    data = warringstate)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.5449 -0.2636 -0.1357  0.1069  0.9438 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)  0.31034    0.10420   2.978   0.0043 **
+cavalryB     0.07549    0.25675   0.294   0.7699   
+cavalryA    -0.03271    0.19130  -0.171   0.8649   
+coalitionB   0.19174    0.11152   1.719   0.0912 . 
+coalitionA  -0.25414    0.11620  -2.187   0.0330 * 
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.4252 on 55 degrees of freedom
+  (2829 observations deleted due to missingness)
+Multiple R-squared:  0.1163,    Adjusted R-squared:  0.05198 
+F-statistic: 1.809 on 4 and 55 DF,  p-value: 0.1403</code></pre>
+</div>
+<p><em>#Whether the number of total casualties is correlated to the usage of cavalry, whether the battle was naval, a siege, and whether there were years of peace <code>peace_years</code>, and the terrain ruggedness. (Note that this result is not so reliable, because there is missing data of casualties for battles on either or both sides.)</em></p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>casualties_data_type</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>warringstate</span><span class='op'>$</span><span class='va'>casualtiesA</span>, <span class='va'>warringstate</span><span class='op'>$</span><span class='va'>casualtiesB</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span> <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='op'>)</span> </span>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>casualties_data_type</span>, caption <span class='op'>=</span> <span class='st'>"Examples of Types of Casualties data"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
-<caption><span id="tab:unnamed-chunk-12">Table 2: </span>Types of Casualties in this data</caption>
+<caption><span id="tab:unnamed-chunk-12">Table 2: </span>Examples of Types of Casualties data</caption>
 <thead>
 <tr class="header">
-<th style="text-align: left;">unique(c(warringstate<span class="math inline">\(casualtiesA, warringstate\)</span>casualtiesB))</th>
+<th style="text-align: left;">x</th>
 </tr>
 </thead>
 <tbody>
@@ -2307,236 +2121,94 @@ F-statistic: 1.387 on 4 and 37 DF,  p-value: 0.2573</code></pre>
 <tr class="even">
 <td style="text-align: left;">100</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">2500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">100s (both sides)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1,000s</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">110</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">37</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">800</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">358</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">117</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">5000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">18 injured</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">511</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">60~80</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">59</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">97</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">2700</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">3000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">700~800</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">173</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1200</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">10000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2,000 (both sides)j</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">226</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">20</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">470~570</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">50</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">30</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">33</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">100+</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">400</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">170</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">600</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">5300</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">10s~500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">300~500</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">273</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">240</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">1,000s or 10,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1721</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">3015</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">200</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">4700</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">25</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">280</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1250</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">23</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1000s</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">10s ships</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">343</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">130</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">260</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">60</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">32</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">191~500</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">9600</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">670</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">7,000~8,000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2,000~3,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">305</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">30,000~40,000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">360</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">20000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">250</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">730</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">150</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">91</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1100</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2,000 (both sides)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">763</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2300</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">380</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">35270</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">1800</td>
-</tr>
 </tbody>
 </table>
+</div>
+<p>Now, I need to do some data cleaning, and make them into one numerical variable accounting for the total number of casualties: <code>total_casualties</code>.
+For ranged numbers, I will reassign them the approximate middle of their range.
+For vague numbers (such as “100s”), I will assume it to be a translation from Japanese sources which usually denotes “around 100”, and take the liberty to assign them a number I find sense-making as someone who studies Japanese history.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#recoding casualtiesA into `ca_recode`, casualtiesB into `cb_recode`, and the sum casualties into `sum_casualties`</span></span>
+<span></span>
+<span><span class='va'>warringstate</span> <span class='op'>&lt;-</span> </span>
+<span>  <span class='va'>warringstate</span> <span class='op'>|&gt;</span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    ca_recode <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"10s"</span>                    <span class='op'>~</span> <span class='fl'>15</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"100s"</span>                   <span class='op'>~</span> <span class='fl'>150</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"100s (both sides)"</span>      <span class='op'>~</span> <span class='fl'>300</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"1,000s"</span>                 <span class='op'>~</span> <span class='fl'>1500</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"18 injured"</span>             <span class='op'>~</span> <span class='fl'>18</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"60~80"</span>                  <span class='op'>~</span> <span class='fl'>70</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"2,000 (both sides)j"</span>    <span class='op'>~</span> <span class='fl'>4000</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"700~800"</span>                <span class='op'>~</span> <span class='fl'>750</span>,</span>
+<span>      <span class='va'>casualtiesA</span> <span class='op'>==</span> <span class='st'>"400 (both sides)"</span>       <span class='op'>~</span> <span class='fl'>800</span>,</span>
+<span>      <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_detect.html'>str_detect</a></span><span class='op'>(</span><span class='va'>casualtiesA</span>, <span class='st'>"^[0-9]+$"</span><span class='op'>)</span>     <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>casualtiesA</span><span class='op'>)</span>,</span>
+<span>      <span class='cn'>TRUE</span>                                    <span class='op'>~</span> <span class='cn'>NA_real_</span></span>
+<span>    <span class='op'>)</span>,</span>
+<span>    cb_recode <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"10s"</span>                   <span class='op'>~</span> <span class='fl'>15</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"400 (both sides)"</span>      <span class='op'>~</span> <span class='fl'>800</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"470~570"</span>               <span class='op'>~</span> <span class='fl'>520</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"10s~500"</span>               <span class='op'>~</span> <span class='fl'>255</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"300~500"</span>               <span class='op'>~</span> <span class='fl'>400</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"100+"</span>                  <span class='op'>~</span> <span class='fl'>125</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"191~500"</span>               <span class='op'>~</span> <span class='fl'>345</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"100s"</span>                  <span class='op'>~</span> <span class='fl'>150</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"7,000~8,000"</span>           <span class='op'>~</span> <span class='fl'>7500</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"2,000~3,000"</span>           <span class='op'>~</span> <span class='fl'>2500</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"700~800"</span>               <span class='op'>~</span> <span class='fl'>750</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"30,000~40,000"</span>         <span class='op'>~</span> <span class='fl'>35000</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"10s ships"</span>             <span class='op'>~</span> <span class='fl'>300</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"1,000s or 10,000"</span>      <span class='op'>~</span> <span class='cn'>NA_real_</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"100s (both sides)"</span>     <span class='op'>~</span> <span class='fl'>300</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"1000s"</span>                 <span class='op'>~</span> <span class='fl'>1500</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"18 injured"</span>            <span class='op'>~</span> <span class='fl'>18</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"60~80"</span>                 <span class='op'>~</span> <span class='fl'>70</span>,</span>
+<span>      <span class='va'>casualtiesB</span> <span class='op'>==</span> <span class='st'>"2,000 (both sides)j"</span>   <span class='op'>~</span> <span class='fl'>4000</span>,</span>
+<span>      <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_detect.html'>str_detect</a></span><span class='op'>(</span><span class='va'>casualtiesB</span>, <span class='st'>"^[0-9]+$"</span><span class='op'>)</span>     <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>casualtiesA</span><span class='op'>)</span>,</span>
+<span>      <span class='cn'>TRUE</span>                                    <span class='op'>~</span> <span class='cn'>NA_real_</span></span>
+<span>    <span class='op'>)</span>,</span>
+<span>    sum_casualties <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>      <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>ca_recode</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>cb_recode</span><span class='op'>)</span> <span class='op'>~</span> <span class='cn'>NA_real_</span>,</span>
+<span>      <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>ca_recode</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>cb_recode</span>,</span>
+<span>      <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>cb_recode</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>ca_recode</span>,</span>
+<span>      <span class='cn'>TRUE</span> <span class='op'>~</span> <span class='va'>ca_recode</span> <span class='op'>+</span> <span class='va'>cb_recode</span></span>
+<span>    <span class='op'>)</span></span>
+<span>    <span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>Now we have finished the recoding, we can weave together a regression.</p>
+<p>I aim to look at whether the number of total casualties is correlated to the usage of cavalry, whether the battle was naval, a siege, and whether there were years of peace <code>peace_years</code>, the geography of the battle location, and the terrain ruggedness.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>lm_casualties</span> <span class='op'>&lt;-</span> </span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>sum_casualties</span> <span class='op'>~</span> <span class='va'>cavalry</span> <span class='op'>+</span> <span class='va'>siege</span> <span class='op'>+</span> <span class='va'>peace_years</span> <span class='op'>+</span> <span class='va'>geography</span> <span class='op'>+</span> <span class='va'>terrain_ruggedness</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>lm_casualties</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>
+Call:
+lm(formula = sum_casualties ~ cavalry + siege + peace_years + 
+    geography + terrain_ruggedness, data = warringstate)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+ -4312  -2108  -1215   2835   4881 
+
+Coefficients: (3 not defined because of singularities)
+                   Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)         5476.54    3198.06   1.712    0.138
+cavalry                  NA         NA      NA       NA
+siege                    NA         NA      NA       NA
+peace_years              NA         NA      NA       NA
+geographyshore     -2274.31    2435.69  -0.934    0.386
+terrain_ruggedness   -12.16      17.39  -0.699    0.511
+
+Residual standard error: 3631 on 6 degrees of freedom
+  (2880 observations deleted due to missingness)
+Multiple R-squared:  0.1858,    Adjusted R-squared:  -0.08562 
+F-statistic: 0.6845 on 2 and 6 DF,  p-value: 0.5398</code></pre>
 </div>
 <p>Analysis &amp; Interpretation:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
@@ -2547,15 +2219,6 @@ F-statistic: 1.387 on 4 and 37 DF,  p-value: 0.2573</code></pre>
 <div class="d-appendix">
 </div>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->

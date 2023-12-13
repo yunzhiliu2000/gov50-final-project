@@ -20,9 +20,9 @@ I am combining three datasets from the same study to conduct my regression tests
 These are the variables I am going to mainly look at.
 
 | Name                 | Description                                             |
-|:---------------------|:-------------------------------------------------|
-| `battle`             | binary variable indicating the occurence of a battle    |
-| `battle_id`          | unique numerical identification of a battle             |
+|:----------------------|:------------------------------------------------|
+|                      |                                                         |
+|                      |                                                         |
 | `province`           | name of the province where the battle took place.       |
 | `area`               | area of the province                                    |
 | `terrain_ruggedness` | the terrain ruggedness of the province                  |
@@ -73,7 +73,7 @@ I will also do several other column dropping to make the data more workable, spe
 ```{r}
 warringstate <- warringstate |>
   select(-sideA, -sideB, -location, -day, -day2, -month, -month2, -source) |>
-  distinct(battle_id, .keep_all = TRUE)
+  distinct(battle_id, .keep_all = TRUE) 
 ```
 
 Now we have a data set with 2889 unique battles!
@@ -87,9 +87,23 @@ Therefore, we need to first look at the data, do some cleaning (I am converting 
 
 **Descriptive: Getting familiar with Japan's Warring State Battles**
 
+#Where did most of the battles take place?
+
+```{r}
+tb_most_battle_provinces <- 
+  warringstate|>
+  group_by(province_name) |>
+  drop_na(province_name) |>
+  summarise(count = n()) |>
+  top_n(10, count) |>
+  arrange(desc(count)) 
+knitr::kable(tb_most_battle_provinces, title = "provinces where the most battles took place")
+
+```
+
 1.  *Inland or Near-Shore*
 
-Since the frequency of battles in each provinces and regions have been analyzed by the author himself already, I am now interested, instead, in learning about whether battles took place more often in purely inland provinces or near-shore provinces.
+I am now interested about whether battles took place more often in purely inland provinces or near-shore provinces.
 
 I am curious about this because of Japan's geographical feature as an archipelago.
 I therefore wonder if we can see a significant difference in the total number of conflicts taking place in purely inland locations versus near shore provinces, even if not naval battles.
@@ -101,9 +115,7 @@ near_shore_provinces <- c("yamashiro", "ise", "harima", "hizen", "kii", "settsu"
 
 inland_provinces <- c("yamato", "tanba", "shinano", "mimasaka", "oumi", "tajima", "kaga", "kawachi", "mino", "owari", "echizen", "kai", "tango", "bicchu", "mutsu", "shimotsuke", "izumi", "shimousa", "kazusa", "kouzuke", "chikugo", "inaba", "hitachi", "echigo", "mikawa", "iga", "wakasa", "dewa", "iwami", "hida", "suruga")
 
-```
 
-```{r}
 #create new variables
 warringstate <- warringstate |>
   mutate(
@@ -133,35 +145,30 @@ landshore_plot <- warringstate |>
 landshore_plot
 ```
 
-```{# Count battles per year for each geography}
-```
-
 Analysis:
 
 We see a significant rise in numbers of battles after the 1550s, and the number of battles peaking at around 1580s, both in inland provinces and shore provinces.
 
-We also see a much higher number of shore-province battles in the 1450s (the beginning of the warring state period), which may be an indicator that in the beginning of the time period, these battles were not so politically charged and complex in their reasons for taking place: instead, people fought simply out of necessity, for resources, which mostly came from the sea in the case of premodern Japan.
-It may also be reflect the development of inland fighting technologies from the 1450s to the 1500s, which results in a proportional rise in inland battles (a proportional decrease in near-shore battles.)
+We also see a much higher number of shore-province battles in the 1467s (the beginning of the warring state period), which may be an indicator that in the beginning of the time period, these battles were not so politically charged and complex in their reasons for taking place: instead, people fought simply out of necessity, for resources, which mostly came from the sea in the case of premodern Japan.
+It may also be reflect the development of inland fighting technologies from the 1467s to the 1500s, which results in a proportional rise in inland battles (a proportional decrease in near-shore battles.)
 
 (Side Note: I decided to not use the area plot to demonstrate the proportions because there are 124 battles which took place in provinces unknown (aka, geography = NA).
 Although the number is comparatively small and should not significantly impact the general trends as shown here in these smoothed-lines, they do play a role if I were to make an area plot.
 )
 
-This lead to a question: is the more significant increase in number in inland provinces due to the technical advancement for land battle?
+2.  *Technical advancement in battle: Cavalry*
 
-2.  *Technical advancement in battle: Calvary*
-
-Let's look at the dataset again and see how to extract the information whether a battle has cavalry involved.
+Let's look at the dataset and see how to extract the information whether a battle has cavalry involved.
 
 ```{r}
 forces_data_type <- unique(c(warringstate$forcesA, warringstate$forcesB)) |>
-  tibble() 
-knitr::kable(forces_data_type, caption = "Types of Forces in this data")
-
+  head()
+knitr::kable(forces_data_type, caption = "Examples of Types of Forces Data")
 ```
 
-We can see that this variable is categorical, with a diversity of information.\
+We can see that this variable is categorical, with a diversity of information.
 We are mainly interested in those that has "cavalry" involved here.
+
 I am using the "str_detect" function to create a new variable `cavalry` denoting whether a battle has cavalry involved, as well as `cavalryA`, whether side A has cavalry, and `cavalryB`, whether side B uses cavalry.
 
 ```{r}
@@ -214,8 +221,6 @@ total_prop_cavalry_plot <-
 ```
 
 ```{r}
-options(repos = c(CRAN = "https://cran.rstudio.com"))
-install.packages("patchwork")
 library(patchwork)
 cavalry_battle + total_prop_cavalry_plot
 ```
@@ -225,46 +230,25 @@ Analysis:
 The proportion of cavalry battles is so small over all recorded years, which makes me less confident to interpret the first "number of cavalry battles over years" plot as precisely representative of the history.
 
 However, the smooth line in the proportion plot is indicative of the general trend of cavalry use over the years.
-The observation of the sharp rise in cavalry proportion from the 1450s to the 1500s, matches with our assumption that the rise in cavalry......
-
-*#Road Battle*
-
-Anderson in his paper narrates that, "`adjacent_battle` simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; `road_battle` adds the condition that this adjacent province also shares a major road with the province in question." (Anderson, 7)
-
-This inspires me to compare the numbers of `adjacent_battle` and `road_battle` overtime, to see if there is any divergent in the change in battle numbers that may indicate an improvement in road infrastructure correlated to a rise in road battle numbers.
-
-```{r}
-battle_summary <- warringstate |>
-  group_by(year) |>
-  summarize(road_battles = sum(road_battle, na.rm = TRUE),
-            adjacent_battles = sum(adjacent_battle, na.rm = TRUE))
-
-road_vs_adjacent <- battle_summary |>
-  ggplot(aes(x = year)) +
-  geom_line(aes(y = road_battles, color = "Road Battles"), size = 1.2, alpha = 1) +
-  geom_line(aes(y = adjacent_battles, color = "Adjacent Battles"), size = 1.2, alpha = 0.8) +
-  scale_color_manual(values = c("Road Battles" = "blue", "Adjacent Battles" = "indianred1")) +
-  labs(title = "Road Battles vs Adjacent Battles",
-       x = "Year", y = "Number of Battles",
-       color = "Battle Type") 
-road_vs_adjacent
-
-```
-
-Analysis: From this plot, we can observe that over time there are similar trends in the frequency of battles taking place where major road connections exist and simply with adjacent states.
-It is therefore hard to conclude that an improvement in road infrastructure correlated to a rise in road-specific battles, since adjacent battle numbers always rise and fall together with the number of road battles.
-
-*#Cavalry and terrain ruggedness*
-
-Here I am looking at whether the usage of cavalry is correlated to the terrain ruggedness of the province of battle, holding constant other variables such as `road_battle` (whether the battle was on a major road instead of between adjacent provinces), the `area` (size of the province), `year`, and `neighbors` (how many neighboring provinces was this province adjacent to.)
-
-```{r}
-cavalry_terrain <- 
-  lm(cavalry ~ terrain_ruggedness + road_battle + area + year + neighbors, data = warringstate)
-summary(cavalry_terrain)
-```
+The observation of the sharp rise in cavalry proportion from the 1467s to the 1500s, matches with our assumption that the rise in cavalry......
 
 **Regression**
+
+*#Cavalry and recent battle with adjacent province*
+
+Here I look at the usage of cavalry's relationship to whether there had been recent battle with adjacent provinces, holding constant confounders such as `year`, the number of `neighbors` (how many neighboring provinces was this province adjacent to.)
+
+In his paper, Anderson explains, "`adjacent_battle` simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; `road_battle` adds the condition that this adjacent province also shares a major road with the province in question." (Anderson, 7)
+
+```{r}
+lm_cavalry <- 
+  lm(cavalry ~ adjacent_battle + year + neighbors, data = warringstate) 
+
+tidy(lm_cavalry) |> 
+  knitr::kable(digits = 3)
+
+summary(lm_cavalry)
+```
 
 *#Whether a battle tends to take place more often on rugged or none rugged terrains, (holding constant year, etc.)*
 
@@ -273,24 +257,89 @@ battle_likelyhood <- lm(battle ~ terrain_ruggedness + road_battle + area + year 
 summary(battle_likelyhood)
 ```
 
-*#Whether VictoryA is correlated to the use of cavalry in the battle, whether either side is joined by coalition, and who initiated the fight.*
+*#Whether victory of either side (I will do the same test for both Victory A and Victory B) is correlated to the use of cavalry in the battle, holding constanct whether either side is joined by coalition, and who initiated the fight.*
 
 ```{r}
-victory_a <- lm(victoryA ~ cavalryA + cavalryB + coalitionA + coalitionB + initiatorA, data = warringstate)
+victory_a <- lm(victoryA ~ cavalryA + cavalryB + coalitionA + coalitionB, data = warringstate)
 summary(victory_a)
 ```
 
-*#Whether the number of draws are correlated to the use of cavalry (holding constant coalition, etc.)*
-
-```         
+```{r}
+victory_b <- lm(victoryB ~ cavalryB + cavalryA + coalitionB + coalitionA, data = warringstate)
+summary(victory_b)
 ```
 
-*#Whether the number of total casualties is correlated to the usage of cavalry (Note that this result is not so reliable, because there are could be missing data of casualties for battles on either or both sides.)*
+*#Whether the number of total casualties is correlated to the usage of cavalry, whether the battle was naval, a siege, and whether there were years of peace `peace_years`, and the terrain ruggedness. (Note that this result is not so reliable, because there is missing data of casualties for battles on either or both sides.)*
 
 ```{r}
-casualties_data_type <- unique(c(warringstate$casualtiesA, warringstate$casualtiesB)) |>
-  tibble() 
-knitr::kable(casualties_data_type, caption = "Types of Casualties in this data")
+casualties_data_type <- unique(c(warringstate$casualtiesA, warringstate$casualtiesB)) |> head() 
+knitr::kable(casualties_data_type, caption = "Examples of Types of Casualties data")
+```
+
+Now, I need to do some data cleaning, and make them into one numerical variable accounting for the total number of casualties: `total_casualties`.
+For ranged numbers, I will reassign them the approximate middle of their range.
+For vague numbers (such as "100s"), I will assume it to be a translation from Japanese sources which usually denotes "around 100", and take the liberty to assign them a number I find sense-making as someone who studies Japanese history.
+
+```{r}
+#recoding casualtiesA into `ca_recode`, casualtiesB into `cb_recode`, and the sum casualties into `sum_casualties`
+
+warringstate <- 
+  warringstate |> 
+  mutate(
+    ca_recode = case_when(
+      casualtiesA == "10s"                    ~ 15,
+      casualtiesA == "100s"                   ~ 150,
+      casualtiesA == "100s (both sides)"      ~ 300,
+      casualtiesA == "1,000s"                 ~ 1500,
+      casualtiesA == "18 injured"             ~ 18,
+      casualtiesA == "60~80"                  ~ 70,
+      casualtiesA == "2,000 (both sides)j"    ~ 4000,
+      casualtiesA == "700~800"                ~ 750,
+      casualtiesA == "400 (both sides)"       ~ 800,
+      str_detect(casualtiesA, "^[0-9]+$")     ~ as.numeric(casualtiesA),
+      TRUE                                    ~ NA_real_
+    ),
+    cb_recode = case_when(
+      casualtiesB == "10s"                   ~ 15,
+      casualtiesB == "400 (both sides)"      ~ 800,
+      casualtiesB == "470~570"               ~ 520,
+      casualtiesB == "10s~500"               ~ 255,
+      casualtiesB == "300~500"               ~ 400,
+      casualtiesB == "100+"                  ~ 125,
+      casualtiesB == "191~500"               ~ 345,
+      casualtiesB == "100s"                  ~ 150,
+      casualtiesB == "7,000~8,000"           ~ 7500,
+      casualtiesB == "2,000~3,000"           ~ 2500,
+      casualtiesB == "700~800"               ~ 750,
+      casualtiesB == "30,000~40,000"         ~ 35000,
+      casualtiesB == "10s ships"             ~ 300,
+      casualtiesB == "1,000s or 10,000"      ~ NA_real_,
+      casualtiesB == "100s (both sides)"     ~ 300,
+      casualtiesB == "1000s"                 ~ 1500,
+      casualtiesB == "18 injured"            ~ 18,
+      casualtiesB == "60~80"                 ~ 70,
+      casualtiesB == "2,000 (both sides)j"   ~ 4000,
+      str_detect(casualtiesB, "^[0-9]+$")     ~ as.numeric(casualtiesA),
+      TRUE                                    ~ NA_real_
+    ),
+    sum_casualties = case_when(
+      is.na(ca_recode) & is.na(cb_recode) ~ NA_real_,
+      is.na(ca_recode) ~ cb_recode,
+      is.na(cb_recode) ~ ca_recode,
+      TRUE ~ ca_recode + cb_recode
+    )
+    )
+         
+```
+
+Now we have finished the recoding, we can weave together a regression.
+
+I aim to look at whether the number of total casualties is correlated to the usage of cavalry, whether the battle was naval, a siege, and whether there were years of peace `peace_years`, the geography of the battle location, and the terrain ruggedness.
+
+```{r}
+lm_casualties <- 
+  lm(sum_casualties ~ cavalry + siege + peace_years + geography + terrain_ruggedness, data = warringstate)
+summary(lm_casualties)
 ```
 
 Analysis & Interpretation:
