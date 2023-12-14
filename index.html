@@ -1543,15 +1543,16 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 
 <div class="d-article">
-<h2 id="project-overview">Project Overview</h2>
+<h2 id="introduction">Introduction</h2>
 <p>I use the data from this study:</p>
 <p>Nicholas D. Anderson, “Introducing the Warring States Japan Battle Data,” International Interactions, Latest articles (2022) <a href="https://doi.org/10.1080/03050629.2023.2149514" class="uri">https://doi.org/10.1080/03050629.2023.2149514</a></p>
-<p>My key research question is: How did geographic features and recent conflicts in adjacent provinces influence battle strategies and outcomes in Japan’s Warring States period?</p>
-<p>My hypothesis is that provinces’ geographic characteristics (terrain ruggedness, purely inland or near shore, adjacency to recently conflicted areas), could have influenced strategies (use of cavalries) and outcomes (number of casualties).</p>
+<p>My key research question is:
+How did geographic features and recent conflicts in adjacent provinces influence battle strategies and outcomes in Japan’s Warring States period?</p>
+<p>My hypothesis is that provinces’ geographic characteristics (terrain ruggedness, purely inland or near shore, adjacency to recently conflicted areas), could have influenced strategies (use of cavalries) and outcomes of battles (number of casualties).</p>
 <p>This is important as it provides insights into how geography and regional conflict dynamics influenced historical warfare.</p>
-<p>My study is cross-sectional, as it analyzes data collected from a specific point in time (1467 - 1600) without manipulating the environment, and does not have any intervention or treatment.
-I assume this is typical in the study of history, when we are dealing with pre-modern historical data.</p>
-<p>I am combining three datasets from the same study to conduct my regression tests.
+<p>My study is cross-sectional, as it analyzes data collected from a specific point in time (1467 - 1600) without manipulating the environment or provide any intervention or treatment across time.
+I assume this is typical in the field of history, especially for scholars dealing with pre-modern historical data.</p>
+<p>I am combining three datasets collected by the same scholar in his research to conduct my regressions.
 These are the pre-existing variables I am going to mainly look at.</p>
 <table>
 <colgroup>
@@ -1660,7 +1661,7 @@ Such is the limitation of digital humanities (or, if you count history as social
 <p>Therefore, we need to first look at the data, do some cleaning (I am converting several variables into binary variables), before attempting at any regression.</p>
 <p><strong>Descriptive: Getting familiar with Japan’s Warring State Battles</strong></p>
 <ol type="1">
-<li><em>Inland or Near-Shore</em></li>
+<li><em>Geography: Inland or Near-Shore</em></li>
 </ol>
 <p>I am now interested about whether battles took place more often in purely inland provinces or near-shore provinces.</p>
 <p>I am curious about this because of Japan’s geographical feature as an archipelago.
@@ -1694,9 +1695,10 @@ I therefore wonder if we can see a significant difference in the total number of
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarise</a></span><span class='op'>(</span>count <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/top_n.html'>top_n</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='va'>count</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>count</span><span class='op'>)</span><span class='op'>)</span> </span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>tb_most_battle_provinces</span>, title <span class='op'>=</span> <span class='st'>"provinces where the most battles took place"</span><span class='op'>)</span></span></code></pre>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>tb_most_battle_provinces</span>, caption <span class='op'>=</span> <span class='st'>"provinces where the most battles took place"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
+<caption><span id="tab:unnamed-chunk-4">Table 1: </span>provinces where the most battles took place</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">province_name</th>
@@ -1755,7 +1757,6 @@ I therefore wonder if we can see a significant difference in the total number of
 </tbody>
 </table>
 </div>
-From least to most, where did the battles take place?
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>plot_provinces</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
@@ -1765,7 +1766,7 @@ From least to most, where did the battles take place?
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>count</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/reorder.factor.html'>reorder</a></span><span class='op'>(</span><span class='va'>province_name</span>, <span class='va'>count</span><span class='op'>)</span>, y <span class='op'>=</span> <span class='va'>count</span>, fill <span class='op'>=</span> <span class='va'>geography</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"identity"</span>, binwidth <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>+</span></span>
-<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Province"</span>, y <span class='op'>=</span> <span class='st'>"Count of Battles"</span>, fill <span class='op'>=</span> <span class='st'>"Geography"</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Province"</span>, y <span class='op'>=</span> <span class='st'>"Count of Battles"</span>, fill <span class='op'>=</span> <span class='st'>"Inland or Near-Shore"</span>, title <span class='op'>=</span> <span class='st'>"Battles by Provinces"</span><span class='op'>)</span> <span class='op'>+</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme.html'>theme</a></span><span class='op'>(</span>axis.text.x <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/element.html'>element_text</a></span><span class='op'>(</span>angle <span class='op'>=</span> <span class='fl'>90</span>, hjust <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
 <span><span class='va'>plot_provinces</span></span></code></pre>
@@ -1774,14 +1775,15 @@ From least to most, where did the battles take place?
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#count the total number of battles in inland provinces and shore provinces}</span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#count the total number of battles in inland provinces and shore provinces</span></span>
 <span><span class='va'>tb_inlandshore</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>geography</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/count.html'>count</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/drop_na.html'>drop_na</a></span><span class='op'>(</span><span class='op'>)</span></span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>tb_inlandshore</span><span class='op'>)</span></span></code></pre>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>tb_inlandshore</span>, caption <span class='op'>=</span> <span class='st'>"no. of battles in inland vs shore provinces"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
+<caption><span id="tab:unnamed-chunk-6">Table 2: </span>no. of battles in inland vs shore provinces</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">geography</th>
@@ -1818,9 +1820,9 @@ From least to most, where did the battles take place?
 <p>We see a significant rise in numbers of battles after the 1550s, and the number of battles peaking at around 1580s, both in inland provinces and shore provinces.</p>
 <p>We also see a much higher number of shore-province battles in the beginning of the warring state period, which may be an indicator that by then, these battles were not so politically charged but simply out of necessity–for resources, which, in the case of premodern Japan, mostly came from the sea.</p>
 <p>It may also be reflect the development of warring technologies from the 1467s to the 1500s, which results in a proportional rise in inland battles.</p>
-<p><em>Side Note: I decided to not use the area plot to demonstrate the proportions because there are 124 battles which took place in provinces unknown (aka, geography = NA). Although the number is comparatively small, and should not significantly impact the general trends as shown here in these smoothed-lines, they do play a role if I were to make an area plot with the y-axis being 1.)</em></p>
+<p><em>Side Note: I decided to not use the area plot to demonstrate the proportions because there are 124 battles which took place in provinces unknown (aka, geography = NA). Although the number is comparatively small, and should not significantly impact the general trends as shown here in these smoothed-lines, they do play a role if I were to make an area plot with the y-axis being 1.</em></p>
 <ol start="2" type="1">
-<li><em>Technical advancement in battle: Cavalry</em></li>
+<li><em>Cavalry</em></li>
 </ol>
 <p>Let’s look at the dataset and see how to extract the information whether a battle has cavalry involved.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1830,7 +1832,7 @@ From least to most, where did the battles take place?
 <span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>forces_data_type</span>, caption <span class='op'>=</span> <span class='st'>"Examples of Types of Forces Data"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
-<caption><span id="tab:unnamed-chunk-7">Table 1: </span>Examples of Types of Forces Data</caption>
+<caption><span id="tab:unnamed-chunk-7">Table 3: </span>Examples of Types of Forces Data</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">x</th>
@@ -1858,9 +1860,8 @@ From least to most, where did the battles take place?
 </tbody>
 </table>
 </div>
-<p>We can see that this variable is categorical, with a diversity of information.
-We are mainly interested in those that has “cavalry” involved here.</p>
-<p>I am using the “str_detect” function to create a new variable <code>cavalry</code> denoting whether a battle has cavalry involved, as well as <code>cavalryA</code>, whether side A has cavalry, and <code>cavalryB</code>, whether side B uses cavalry.</p>
+<p>We can see that the forces variables (<code>forcesA</code> and <code>forcesB</code>) are categorical, and consist of a myriad of information.
+Since we are most interested in those that has “cavalry” involved here, I use the “str_detect” function to create a new variable <code>cavalry</code> denoting whether a battle has cavalry involved, as well as <code>cavalryA</code>, whether side A has cavalry, and <code>cavalryB</code>, whether side B uses cavalry.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#extracting information about cavalry involved</span></span>
@@ -1872,9 +1873,10 @@ We are mainly interested in those that has “cavalry” involved here.</p>
 <span><span class='co'>#counting the number of cavalry involved battles in total</span></span>
 <span><span class='va'>cavalrytotal</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/count.html'>count</a></span><span class='op'>(</span><span class='va'>cavalry</span> <span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span></span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>cavalrytotal</span><span class='op'>)</span></span></code></pre>
+<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>cavalrytotal</span>, caption <span class='op'>=</span> <span class='st'>"Cavalry Involvement (TRUE = No. of Cavalry-involved Battle)"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
+<caption><span id="tab:unnamed-chunk-8">Table 4: </span>Cavalry Involvement (TRUE = No. of Cavalry-involved Battle)</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">cavalry == 1</th>
@@ -1897,7 +1899,7 @@ We are mainly interested in those that has “cavalry” involved here.</p>
 </tbody>
 </table>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#plotting the total number of cavalry battles</span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#plotting the number of cavalry battles over years</span></span>
 <span><span class='va'>cavalry_battle</span> <span class='op'>&lt;-</span> <span class='va'>warringstate</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>cavalry</span> <span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>year</span><span class='op'>)</span><span class='op'>|&gt;</span></span>
@@ -1906,7 +1908,7 @@ We are mainly interested in those that has “cavalry” involved here.</p>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span>na.rm <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>+</span></span>
 <span>    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span></span>
-<span>    title <span class='op'>=</span> <span class='st'>"Number of Cavalry Battles"</span>,</span>
+<span>    title <span class='op'>=</span> <span class='st'>"Number of Cavalry Battles over Years"</span>,</span>
 <span>    x <span class='op'>=</span> <span class='st'>"Year"</span>,</span>
 <span>    y <span class='op'>=</span> <span class='st'>"No. of Cavalry Battles"</span></span>
 <span>  <span class='op'>)</span></span>
@@ -1942,18 +1944,93 @@ We are mainly interested in those that has “cavalry” involved here.</p>
 </div>
 <p>Analysis:</p>
 <p>The proportion of cavalry battles is so small over all recorded years, which makes me less confident to interpret the first “number of cavalry battles over years” plot as precisely representative of the history.</p>
-<p>However, the smooth line in the proportion plot is indicative of the general trend of cavalry use over the years.
-The observation of the sharp rise in cavalry proportion from the 1467s to the 1500s, matches with our assumption that the rise in cavalry……</p>
+<p>The smooth line in the proportion plot is indicative of the general trend of cavalry use over the years.
+The observation of the sharp rise in cavalry proportion from the 1467s to the 1500s, matches with our assumption that the rise in cavalry may be correlated to the rise in land battle proportion among all battles.
+Nevertheless, we must realize that most of the battles recorded here, we simply DON’T KNOW whether they had cavalries involved or not. This is a fundamental limitation to half of my research question.</p>
 <p><strong>Regression</strong></p>
 <p><em>#Cavalry and recent battle with adjacent province</em></p>
-<p>Here I look at the usage of cavalry’s relationship to whether there had been recent battle with adjacent provinces, holding constant confounders such as <code>year</code>, the number of <code>neighbors</code> (how many neighboring provinces was this province adjacent to.)</p>
-<p>In his paper, Anderson explains, “<code>adjacent_battle</code> simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; <code>road_battle</code> adds the condition that this adjacent province also shares a major road with the province in question.” (Anderson, 7)</p>
+<p>Here I look at the usage of cavalry’s relationship to the geographical features of a battlefield (terrain ruggedness, shore or inland), and whether there had been recent battle with adjacent provinces, holding constant confounders such as <code>year</code>, and the number of <code>neighbors</code> (how many neighboring provinces was this province adjacent to.)</p>
+<p>In his paper, Anderson explains, “<code>adjacent_battle</code> simply indicates whether a province sharing a land border with a given province experienced conflict within the past 24 months; <code>road_battle</code> adds the condition that this adjacent province also shares a major road with the province in question.” (Anderson, 7) Since adjacent_battle would always include all road_battles, I am not so concerned about road battles here.</p>
+Note, one of the independent variable here, <code>geography</code>, is a two-level categorical variable.
+When calculated in the regression model, R is helping me converting it into a binary, dummy variable.
+As you can identify from the printed regression outputs, it is calculated based on the assumption that shore = 1, and inland = 0.
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>lm_cavalry</span> <span class='op'>&lt;-</span> </span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>lm_cavalry1</span> <span class='op'>&lt;-</span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>cavalry</span> <span class='op'>~</span> <span class='va'>terrain_ruggedness</span> <span class='op'>+</span> <span class='va'>geography</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></span><span class='op'>(</span><span class='va'>lm_cavalry1</span><span class='op'>)</span> <span class='op'>|&gt;</span> </span>
+<span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span>digits <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span></code></pre>
+</div>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">term</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">std.error</th>
+<th style="text-align: right;">statistic</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">0.267</td>
+<td style="text-align: right;">0.165</td>
+<td style="text-align: right;">1.621</td>
+<td style="text-align: right;">0.109</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">terrain_ruggedness</td>
+<td style="text-align: right;">-0.001</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">-0.902</td>
+<td style="text-align: right;">0.370</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">geographyshore</td>
+<td style="text-align: right;">0.221</td>
+<td style="text-align: right;">0.103</td>
+<td style="text-align: right;">2.154</td>
+<td style="text-align: right;">0.034</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>lm_cavalry1</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>
+Call:
+lm(formula = cavalry ~ terrain_ruggedness + geography, data = warringstate)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.3866 -0.3591 -0.1616  0.5969  0.8743 
+
+Coefficients:
+                     Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)         0.2667241  0.1645314   1.621   0.1091  
+terrain_ruggedness -0.0007686  0.0008520  -0.902   0.3698  
+geographyshore      0.2211681  0.1026634   2.154   0.0343 *
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.4404 on 77 degrees of freedom
+  (2809 observations deleted due to missingness)
+Multiple R-squared:  0.06348,   Adjusted R-squared:  0.03916 
+F-statistic:  2.61 on 2 and 77 DF,  p-value: 0.08005</code></pre>
+</div>
+<p>Analysis:
+The positive intercept coefficient is neither significant statistically (p = 0.109) nor in reality, as it shows the baseline of cavalry presence, which is not interesting with our limited and particularly historically-concerned data.
+The coefficient -0.001 of variable <code>terrain_ruggedness</code> suggests that, holding constant the other geographical feature (shore or inland), the increase in the land’s ruggedness is associated with to an extremely slight decrease in the likelihood of cavalry use.
+However, this is not statistically significant (p = 0.370), meaning that we can’t confidently infer this correlation.
+The positive coefficient 0.221 of <code>geography</code> suggests that, holding constant the terrain ruggedness, the shore provinces is associated with a slight higher likelihood of cavalry use.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>lm_cavalry2</span> <span class='op'>&lt;-</span> </span>
 <span>  <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>cavalry</span> <span class='op'>~</span> <span class='va'>adjacent_battle</span> <span class='op'>+</span> <span class='va'>year</span> <span class='op'>+</span> <span class='va'>neighbors</span>, data <span class='op'>=</span> <span class='va'>warringstate</span><span class='op'>)</span> </span>
 <span></span>
-<span><span class='fu'><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></span><span class='op'>(</span><span class='va'>lm_cavalry</span><span class='op'>)</span> <span class='op'>|&gt;</span> </span>
+<span><span class='fu'><a href='https://generics.r-lib.org/reference/tidy.html'>tidy</a></span><span class='op'>(</span><span class='va'>lm_cavalry2</span><span class='op'>)</span> <span class='op'>|&gt;</span> </span>
 <span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span>digits <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
@@ -1998,7 +2075,7 @@ The observation of the sharp rise in cavalry proportion from the 1467s to the 15
 </tbody>
 </table>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>lm_cavalry</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>lm_cavalry2</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 Call:
@@ -2023,9 +2100,9 @@ Multiple R-squared:  0.1445,    Adjusted R-squared:  0.1107
 F-statistic: 4.279 on 3 and 76 DF,  p-value: 0.007602</code></pre>
 </div>
 <p>Analysis:
-The positive coefficient (7.029) suggests a baseline presence of cavalry in battles, which is statistically significant (p = 0.006), but not meaningful or interesting in reality.
-The negative coefficient -0.055 of variable <code>adjacent_battle</code> suggests that, holding constant the time (year) and the number of adjacent provinces (neighbors), the existence of a recent battle in adjacent provinces is associated to a slight decrease in the likelihood of cavalry use in a current battel. However, this is not statistically significant (p = 0.745), meaning that we can’t confidently infer this correlation.
-This suggests that over time, the presence of cavalry in battles decreased, but there is no strong evidence from this model to suggest that the presence of cavalry is influenced by conflicts in neighboring provinces or the number of neighboring provinces.</p>
+The positive intercept coefficient (7.029) suggests a baseline presence of cavalry in battles, which is statistically significant (p = 0.006), but not meaningful or interesting in reality.
+The negative coefficient -0.055 of variable <code>adjacent_battle</code> suggests that, holding constant the time (year) and the number of adjacent provinces (neighbors), the existence of a recent battle in adjacent provinces is associated to a slight decrease in the likelihood of cavalry use in a current battle. However, this is not statistically significant (p = 0.745), meaning that we can’t confidently infer this correlation.</p>
+<p>This suggests that over time, the presence of cavalry in battles decreased, but there is no strong evidence from this model to suggest that the presence of cavalry is influenced by conflicts in neighboring provinces or the number of neighboring provinces.</p>
 <p><em>#Whether victory of either side (I will do the same test for both Victory A and Victory B) is correlated to the use of cavalry in the battle, holding constanct whether either side is joined by coalition, and who initiated the fight.</em></p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2201,7 +2278,7 @@ F-statistic: 1.809 on 4 and 55 DF,  p-value: 0.1403</code></pre>
 <span><span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>casualties_data_type</span>, caption <span class='op'>=</span> <span class='st'>"Examples of Types of Casualties data"</span><span class='op'>)</span></span></code></pre>
 </div>
 <table>
-<caption><span id="tab:unnamed-chunk-12">Table 2: </span>Examples of Types of Casualties data</caption>
+<caption><span id="tab:unnamed-chunk-13">Table 5: </span>Examples of Types of Casualties data</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">x</th>
@@ -2367,7 +2444,7 @@ The coefficient of 391.376 for variable <code>adjacent_battle</code> indicates a
 Especially, with vague data from historical documents being further abstracted for the purpose of calculation (which is what I did during data cleaning), makes these outcomes less meaningful and trustworthy.
 The field of digital humanities is filled with unprocessed data, many of which is vague in nature and unable to be checked in the near future.
 However, statistical thinking, I believe, should still be more valued when doing historical analysis and interpretations.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
